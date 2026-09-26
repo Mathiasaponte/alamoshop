@@ -202,7 +202,7 @@ function Seg({ value, options, onChange }: { value: string; options: string[]; o
   );
 }
 
-function PriceInput({ value, onChange, placeholder }: { value?: number; onChange: (v?: number) => void; placeholder: string }) {
+function PriceInput({ value, onChange, placeholder }: { value: number | undefined; onChange: (v?: number) => void; placeholder: string }) {
   return (
     <input
       type="number"
