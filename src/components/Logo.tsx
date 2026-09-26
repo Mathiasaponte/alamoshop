@@ -13,7 +13,7 @@ export function Logo({ variant = "lockup", className = "", size = 40 }: LogoProp
     return (
       <img
         src={logoAsset.url}
-        alt="Colegio Álamos Cancún"
+        alt="Álamos Shop"
         width={size}
         height={size}
         className={`h-auto w-auto object-contain ${className}`}
@@ -26,7 +26,7 @@ export function Logo({ variant = "lockup", className = "", size = 40 }: LogoProp
     return (
       <img
         src={emblemAsset.url}
-        alt="Colegio Álamos Cancún"
+        alt="Álamos Shop"
         width={size}
         height={size}
         className={`object-contain ${className}`}
@@ -39,7 +39,7 @@ export function Logo({ variant = "lockup", className = "", size = 40 }: LogoProp
     <span className={`inline-flex items-center gap-3 ${className}`}>
       <img
         src={emblemAsset.url}
-        alt="Colegio Álamos Cancún"
+        alt="Álamos Shop"
         width={size}
         height={size}
         className="object-contain"

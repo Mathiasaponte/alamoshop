@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
+import { StoreProvider } from "../lib/store";
+import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -76,16 +78,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Álamos Shop — Colegio Álamos Cancún" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { title: "Álamos Shop — De estudiantes, para estudiantes" },
       {
         name: "description",
-        content: "Tienda oficial del Colegio Álamos Cancún: uniformes, papelería y eventos.",
+        content: "Marketplace independiente donde estudiantes de Álamos compran y venden entre ellos.",
       },
-      { property: "og:title", content: "Álamos Shop — Colegio Álamos Cancún" },
+      { property: "og:title", content: "Álamos Shop — De estudiantes, para estudiantes" },
       {
         property: "og:description",
-        content: "Tienda oficial del Colegio Álamos Cancún: uniformes, papelería y eventos.",
+        content: "Marketplace independiente donde estudiantes de Álamos compran y venden entre ellos.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -112,7 +114,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
@@ -130,7 +132,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <StoreProvider>
+        <Outlet />
+        <Toaster position="top-center" />
+      </StoreProvider>
     </QueryClientProvider>
   );
 }
