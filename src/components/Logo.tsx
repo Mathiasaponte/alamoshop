@@ -7,13 +7,13 @@ type LogoProps = {
   size?: number;
 };
 
-/** Official Colegio Álamos Cancún mark. Never restyle or distort. */
+/** Álamos Shop brand mark. Never restyle or distort. */
 export function Logo({ variant = "lockup", className = "", size = 40 }: LogoProps) {
   if (variant === "full") {
     return (
       <img
         src={logoAsset.url}
-        alt="Colegio Álamos Cancún"
+        alt="Álamos Shop"
         width={size}
         height={size}
         className={`h-auto w-auto object-contain ${className}`}
@@ -26,7 +26,7 @@ export function Logo({ variant = "lockup", className = "", size = 40 }: LogoProp
     return (
       <img
         src={emblemAsset.url}
-        alt="Colegio Álamos Cancún"
+        alt="Álamos Shop"
         width={size}
         height={size}
         className={`object-contain ${className}`}
@@ -39,7 +39,7 @@ export function Logo({ variant = "lockup", className = "", size = 40 }: LogoProp
     <span className={`inline-flex items-center gap-3 ${className}`}>
       <img
         src={emblemAsset.url}
-        alt="Colegio Álamos Cancún"
+        alt="Álamos Shop"
         width={size}
         height={size}
         className="object-contain"
@@ -49,8 +49,8 @@ export function Logo({ variant = "lockup", className = "", size = 40 }: LogoProp
         <span className="font-display text-lg font-semibold tracking-tight text-primary">
           Álamos Shop
         </span>
-        <span className="mt-1 text-[0.6rem] uppercase tracking-[0.28em] text-muted-foreground">
-          Cancún
+        <span className="mt-1 text-[0.6rem] uppercase tracking-[0.2em] text-muted-foreground">
+          De estudiantes
         </span>
       </span>
     </span>

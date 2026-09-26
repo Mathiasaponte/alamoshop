@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture
+- Marketplace state (prefs, profile, favorites, orders, own listings) lives in `src/lib/store.tsx` (localStorage) with mock catalog in `src/lib/data.ts` — demo stage until Lovable Cloud tables replace it.
+- All app pages wrap content in `AppShell` (desktop header + mobile bottom nav) — keeps app-like mobile nav consistent.
