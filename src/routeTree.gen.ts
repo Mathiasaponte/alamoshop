@@ -10,9 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as TiendaRouteImport } from './routes/tienda'
+import { Route as VenderRouteImport } from './routes/vender'
+import { Route as OrdenesIndexRouteImport } from './routes/ordenes.index'
+import { Route as OrdenesIdRouteImport } from './routes/ordenes.$id'
 import { Route as PIdRouteImport } from './routes/p.$id'
 import { Route as UIdRouteImport } from './routes/u.$id'
 
@@ -21,19 +26,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CategoriasRoute = CategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FavoritosRoute = FavoritosRouteImport.update({
+  id: '/favoritos',
+  path: '/favoritos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketplaceRoute = MarketplaceRouteImport.update({
   id: '/marketplace',
   path: '/marketplace',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TiendaRoute = TiendaRouteImport.update({
+  id: '/tienda',
+  path: '/tienda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VenderRoute = VenderRouteImport.update({
+  id: '/vender',
+  path: '/vender',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdenesIndexRoute = OrdenesIndexRouteImport.update({
+  id: '/ordenes/',
+  path: '/ordenes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdenesIdRoute = OrdenesIdRouteImport.update({
+  id: '/ordenes/$id',
+  path: '/ordenes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PIdRoute = PIdRouteImport.update({
@@ -49,52 +79,98 @@ const UIdRoute = UIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
+  '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
+  '/perfil': typeof PerfilRoute
+  '/tienda': typeof TiendaRoute
+  '/vender': typeof VenderRoute
+  '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
+  '/ordenes/': typeof OrdenesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
+  '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
+  '/perfil': typeof PerfilRoute
+  '/tienda': typeof TiendaRoute
+  '/vender': typeof VenderRoute
+  '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
+  '/ordenes': typeof OrdenesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
+  '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
+  '/perfil': typeof PerfilRoute
+  '/tienda': typeof TiendaRoute
+  '/vender': typeof VenderRoute
+  '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
+  '/ordenes/': typeof OrdenesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/categorias' | '/marketplace' | '/p/$id' | '/u/$id'
+    | '/'
+    | '/categorias'
+    | '/favoritos'
+    | '/marketplace'
+    | '/perfil'
+    | '/tienda'
+    | '/vender'
+    | '/ordenes/$id'
+    | '/p/$id'
+    | '/u/$id'
+    | '/ordenes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/categorias' | '/marketplace' | '/p/$id' | '/u/$id'
+  to:
+    | '/'
+    | '/categorias'
+    | '/favoritos'
+    | '/marketplace'
+    | '/perfil'
+    | '/tienda'
+    | '/vender'
+    | '/ordenes/$id'
+    | '/p/$id'
+    | '/u/$id'
+    | '/ordenes'
   id:
     | '__root__'
     | '/'
-    | '/auth'
     | '/categorias'
+    | '/favoritos'
     | '/marketplace'
+    | '/perfil'
+    | '/tienda'
+    | '/vender'
+    | '/ordenes/$id'
     | '/p/$id'
     | '/u/$id'
+    | '/ordenes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRoute
   CategoriasRoute: typeof CategoriasRoute
+  FavoritosRoute: typeof FavoritosRoute
   MarketplaceRoute: typeof MarketplaceRoute
+  PerfilRoute: typeof PerfilRoute
+  TiendaRoute: typeof TiendaRoute
+  VenderRoute: typeof VenderRoute
+  OrdenesIdRoute: typeof OrdenesIdRoute
   PIdRoute: typeof PIdRoute
   UIdRoute: typeof UIdRoute
+  OrdenesIndexRoute: typeof OrdenesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -106,13 +182,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/categorias': {
       id: '/categorias'
       path: '/categorias'
@@ -120,11 +189,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/favoritos': {
+      id: '/favoritos'
+      path: '/favoritos'
+      fullPath: '/favoritos'
+      preLoaderRoute: typeof FavoritosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/marketplace': {
       id: '/marketplace'
       path: '/marketplace'
       fullPath: '/marketplace'
       preLoaderRoute: typeof MarketplaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tienda': {
+      id: '/tienda'
+      path: '/tienda'
+      fullPath: '/tienda'
+      preLoaderRoute: typeof TiendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vender': {
+      id: '/vender'
+      path: '/vender'
+      fullPath: '/vender'
+      preLoaderRoute: typeof VenderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ordenes/': {
+      id: '/ordenes/'
+      path: '/ordenes'
+      fullPath: '/ordenes/'
+      preLoaderRoute: typeof OrdenesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ordenes/$id': {
+      id: '/ordenes/$id'
+      path: '/ordenes/$id'
+      fullPath: '/ordenes/$id'
+      preLoaderRoute: typeof OrdenesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/$id': {
@@ -146,11 +257,16 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthRoute: AuthRoute,
   CategoriasRoute: CategoriasRoute,
+  FavoritosRoute: FavoritosRoute,
   MarketplaceRoute: MarketplaceRoute,
+  PerfilRoute: PerfilRoute,
+  TiendaRoute: TiendaRoute,
+  VenderRoute: VenderRoute,
+  OrdenesIdRoute: OrdenesIdRoute,
   PIdRoute: PIdRoute,
   UIdRoute: UIdRoute,
+  OrdenesIndexRoute: OrdenesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
