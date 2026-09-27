@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Heart, Star } from "lucide-react";
 import { formatPrice, type Product } from "@/lib/data";
 import { useStore } from "@/lib/store";
+import { toast } from "sonner";
 
 export function ProductCard({ product }: { product: Product }) {
   const { getSeller, favorites, toggleFavorite } = useStore();
@@ -25,20 +26,22 @@ export function ProductCard({ product }: { product: Product }) {
           onClick={(e) => {
             e.preventDefault();
             toggleFavorite(product.id);
+            toast(fav ? "Quitado de favoritos" : "Guardado en favoritos");
           }}
           className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-background/90 backdrop-blur transition-transform active:scale-90"
         >
-          <Heart className={`h-4 w-4 ${fav ? "fill-primary text-primary" : "text-foreground"}`} />
+          <Heart key={String(fav)} className={`h-4 w-4 ${fav ? "fill-primary text-primary animate-in zoom-in-50 duration-300" : "text-foreground"}`} />
         </button>
         {product.status === "reserved" && (
           <span className="absolute left-2 top-2 rounded-full bg-gold px-2.5 py-1 text-[0.65rem] font-medium text-gold-foreground">Reservado</span>
         )}
+        {product.status !== "reserved" && Date.now() - product.createdAt < 3 * 86400000 && (
+          <span className="absolute left-2 top-2 rounded-full bg-primary px-2.5 py-1 text-[0.65rem] font-medium text-primary-foreground">Nuevo</span>
+        )}
       </div>
       <div className="p-3">
-        <div className="flex items-baseline justify-between gap-2">
-          <p className="truncate text-sm font-medium text-foreground">{product.title}</p>
-        </div>
-        <p className="mt-0.5 font-display text-xl font-semibold text-primary">{formatPrice(product.price)}</p>
+        <p className="font-display text-xl font-semibold text-primary">{formatPrice(product.price)}</p>
+        <p className="truncate text-sm font-medium text-foreground">{product.title}</p>
         <p className="text-xs text-muted-foreground">{product.condition}</p>
         {seller && (
           <div className="mt-2 border-t border-border pt-2">

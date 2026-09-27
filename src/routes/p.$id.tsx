@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowLeft, Flag, Heart, MapPin, MessageCircle, ShieldCheck, Star } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, Avatar } from "@/components/AppShell";
+import { ProductCard } from "@/components/ProductCard";
 import { formatPrice, PRODUCTS } from "@/lib/data";
 import { useStore } from "@/lib/store";
 
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/p/$id")({
 
 function ProductPage() {
   const { id } = Route.useParams();
-  const { getProduct, getSeller, favorites, toggleFavorite, createOrder, orders, hydrated } = useStore();
+  const { allProducts, getProduct, getSeller, favorites, toggleFavorite, createOrder, orders, hydrated } = useStore();
   const navigate = useNavigate();
   const product = getProduct(id);
   const [note, setNote] = useState("");
@@ -46,6 +47,9 @@ function ProductPage() {
   const fav = favorites.includes(product.id);
   const existing = orders.find((o) => o.productId === product.id && !["cancelado", "rechazado", "completado"].includes(o.status));
   const isMine = product.sellerId === "me";
+  const visible = allProducts.filter((p) => p.id !== product.id && (p.status === "active" || p.status === "reserved"));
+  const fromSeller = visible.filter((p) => p.sellerId === product.sellerId).slice(0, 4);
+  const similar = visible.filter((p) => p.category === product.category && p.sellerId !== product.sellerId).slice(0, 4);
 
   const request = () => {
     const o = createOrder(product.id, note);
@@ -110,7 +114,7 @@ function ProductPage() {
                 <Link to="/ordenes/$id" params={{ id: existing.id }} className="flex-1 rounded-full bg-primary py-3.5 text-center text-sm font-medium text-primary-foreground">Ver mi orden</Link>
               ) : (
                 <button onClick={() => (asking ? request() : setAsking(true))} className="flex-1 rounded-full bg-primary py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-deep)] active:scale-[0.98]">
-                  {asking ? "Enviar solicitud" : "Comprar / solicitar"}
+                  {asking ? "Enviar solicitud" : "Solicitar compra"}
                 </button>
               )}
               <button onClick={() => toggleFavorite(product.id)} className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-background" aria-label="Guardar">
@@ -122,7 +126,7 @@ function ProductPage() {
                 onClick={() => (existing ? navigate({ to: "/ordenes/$id", params: { id: existing.id } }) : (setAsking(true), toast("Envía una solicitud para desbloquear el contacto del vendedor.")))}
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background py-3 text-sm hover:border-primary"
               >
-                <MessageCircle className="h-4 w-4" /> Contactar vendedor
+                <MessageCircle className="h-4 w-4" /> Contactar
               </button>
             )}
 
@@ -135,6 +139,17 @@ function ProductPage() {
             </button>
           </div>
         </div>
+        {[["Más productos de este vendedor", fromSeller], ["Productos similares", similar]].map(([t, list]) =>
+          (list as typeof visible).length ? (
+            <section key={t as string} className="px-4 pt-10 md:px-0">
+              <h2 className="text-2xl text-primary">{t as string}</h2>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 md:gap-5">
+                {(list as typeof visible).map((p) => <ProductCard key={p.id} product={p} />)}
+              </div>
+            </section>
+          ) : null,
+        )}
+        <div className="h-10" />
       </div>
     </AppShell>
   );
