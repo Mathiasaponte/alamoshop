@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { z } from "zod";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { ProductCard } from "@/components/ProductCard";
-import { CATEGORIES, CATEGORY_EMOJI, SELLERS } from "@/lib/data";
+import { CATEGORIES, CATEGORY_EMOJI, SELLERS, type Product } from "@/lib/data";
 import { useStore } from "@/lib/store";
 
 const searchSchema = z.object({
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/marketplace")({
 function Marketplace() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/marketplace" });
-  const { allProducts, prefs } = useStore();
+  const { allProducts, prefs, getSeller } = useStore();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState(search.q ?? "");
 
@@ -47,7 +47,7 @@ function Marketplace() {
     let list = allProducts.filter((p) => p.status === "active" || p.status === "reserved");
     if (search.q) {
       const t = search.q.toLowerCase();
-      list = list.filter((p) => `${p.title} ${p.description} ${p.category}`.toLowerCase().includes(t));
+      list = list.filter((p) => `${p.title} ${p.description} ${p.category} ${getSeller(p.sellerId)?.name ?? ""}`.toLowerCase().includes(t));
     }
     if (search.cat) list = list.filter((p) => p.category === search.cat);
     if (search.cond === "Nuevo") list = list.filter((p) => p.condition === "Nuevo");
@@ -65,9 +65,25 @@ function Marketplace() {
       if (sort === "populares") return b.likes - a.likes;
       return score(b) - score(a) || b.createdAt - a.createdAt;
     });
-  }, [allProducts, search, campus, level]);
+  }, [allProducts, search, campus, level, getSeller]);
 
   const activeCount = [search.cat, search.cond, search.min, search.max, search.sort].filter((x) => x != null).length;
+  const filtering = activeCount > 0 || !!search.q;
+  const [recent, setRecent] = useState<string[]>([]);
+  const [focused, setFocused] = useState(false);
+  useEffect(() => {
+    try { setRecent(JSON.parse(localStorage.getItem("alamos-recent") ?? "[]")); } catch { /* ignore */ }
+  }, []);
+  const runSearch = (term: string) => {
+    const t = term.trim();
+    setQ(t);
+    set({ q: t || undefined });
+    if (t) {
+      const next = [t, ...recent.filter((r) => r.toLowerCase() !== t.toLowerCase())].slice(0, 6);
+      setRecent(next);
+      localStorage.setItem("alamos-recent", JSON.stringify(next));
+    }
+  };
 
   return (
     <AppShell>
@@ -77,19 +93,29 @@ function Marketplace() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              set({ q: q || undefined });
+              runSearch(q);
             }}
-            className="mt-4 flex items-center gap-2"
+            className="relative mt-4 flex items-center gap-2"
           >
             <div className="flex flex-1 items-center gap-3 rounded-full border border-border bg-secondary px-4 py-3 focus-within:border-primary">
               <Search className="h-5 w-5 text-muted-foreground" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Sneakers, AirPods, brownies, tutorías…" className="w-full bg-transparent text-base outline-none" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 150)} placeholder="Producto, categoría o vendedor…" className="w-full bg-transparent text-base outline-none" />
               {q && (
                 <button type="button" onClick={() => { setQ(""); set({ q: undefined }); }} aria-label="Limpiar">
                   <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               )}
             </div>
+            {focused && !q && recent.length > 0 && (
+              <div className="surface-card absolute left-0 right-14 top-full z-20 mt-2 p-3 animate-in fade-in slide-in-from-top-1">
+                <p className="eyebrow mb-2">Búsquedas recientes</p>
+                <div className="flex flex-wrap gap-2">
+                  {recent.map((r) => (
+                    <button key={r} type="button" onMouseDown={() => runSearch(r)} className="rounded-full bg-secondary px-3 py-1.5 text-sm hover:text-primary">{r}</button>
+                  ))}
+                </div>
+              </div>
+            )}
             <button type="button" onClick={() => setOpen((o) => !o)} className="relative flex h-12 w-12 items-center justify-center rounded-full border border-border hover:border-primary" aria-label="Filtros">
               <SlidersHorizontal className="h-5 w-5" />
               {activeCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[0.65rem] text-primary-foreground">{activeCount}</span>}
@@ -148,11 +174,19 @@ function Marketplace() {
         )}
       </section>
 
+      {!filtering && results.length > 0 && (
+        <>
+          <Row title="Recién publicado" items={[...results].sort((a, b) => b.createdAt - a.createdAt).slice(0, 8)} />
+          <Row title="Popular cerca de ti" items={[...results].filter((p) => p.campus === campus || campus === "Ambos").sort((a, b) => b.likes - a.likes).slice(0, 8)} />
+        </>
+      )}
+
       <section className="mx-auto max-w-6xl px-4 py-6 md:px-6">
-        <p className="mb-4 text-sm text-muted-foreground">{results.length} publicaciones</p>
+        {!filtering && <h2 className="mb-1 text-2xl text-primary">Todo el marketplace</h2>}
+        <p className="mb-4 text-sm text-muted-foreground">{results.length} {results.length === 1 ? "resultado" : "resultados"}</p>
         {results.length === 0 ? (
           <div className="surface-card p-10 text-center">
-            <p className="font-display text-2xl text-primary">Nada por aquí… todavía</p>
+            <p className="font-display text-2xl text-primary">No encontramos nada por aquí todavía.</p>
             <p className="mt-2 text-sm text-muted-foreground">Prueba otros filtros o sé el primero en publicarlo.</p>
             <Link to="/vender" className="mt-5 inline-block rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground">+ Publicar producto</Link>
           </div>
@@ -166,7 +200,8 @@ function Marketplace() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-12 md:px-6">
-        <h2 className="text-2xl text-primary">Vendedores de tu comunidad</h2>
+        <h2 className="text-2xl text-primary">Vendedores activos</h2>
+        <p className="text-xs text-muted-foreground">Perfiles reales de estudiantes. Compra dentro de tu comunidad.</p>
         <div className="mt-4 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none]">
           {SELLERS.map((s) => (
             <Link key={s.id} to="/u/$id" params={{ id: s.id }} className="surface-card flex w-44 shrink-0 flex-col items-center p-4 text-center transition-transform hover:-translate-y-0.5">
@@ -179,6 +214,22 @@ function Marketplace() {
         </div>
       </section>
     </AppShell>
+  );
+}
+
+function Row({ title, items }: { title: string; items: Product[] }) {
+  if (items.length === 0) return null;
+  return (
+    <section className="mx-auto max-w-6xl px-4 pt-6 md:px-6">
+      <h2 className="text-2xl text-primary">{title}</h2>
+      <div className="-mx-4 mt-3 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:px-0">
+        {items.map((p) => (
+          <div key={p.id} className="w-40 shrink-0 snap-start sm:w-48">
+            <ProductCard product={p} />
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
