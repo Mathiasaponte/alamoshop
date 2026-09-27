@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { z } from "zod";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { ProductCard } from "@/components/ProductCard";
-import { CATEGORIES, CATEGORY_EMOJI, SELLERS } from "@/lib/data";
+import { CATEGORIES, CATEGORY_EMOJI, SELLERS, type Product } from "@/lib/data";
 import { useStore } from "@/lib/store";
 
 const searchSchema = z.object({
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/marketplace")({
 function Marketplace() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/marketplace" });
-  const { allProducts, prefs } = useStore();
+  const { allProducts, prefs, getSeller } = useStore();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState(search.q ?? "");
 
@@ -65,7 +65,7 @@ function Marketplace() {
       if (sort === "populares") return b.likes - a.likes;
       return score(b) - score(a) || b.createdAt - a.createdAt;
     });
-  }, [allProducts, search, campus, level]);
+  }, [allProducts, search, campus, level, getSeller]);
 
   const activeCount = [search.cat, search.cond, search.min, search.max, search.sort].filter((x) => x != null).length;
   const filtering = activeCount > 0 || !!search.q;
@@ -93,19 +93,29 @@ function Marketplace() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              set({ q: q || undefined });
+              runSearch(q);
             }}
-            className="mt-4 flex items-center gap-2"
+            className="relative mt-4 flex items-center gap-2"
           >
             <div className="flex flex-1 items-center gap-3 rounded-full border border-border bg-secondary px-4 py-3 focus-within:border-primary">
               <Search className="h-5 w-5 text-muted-foreground" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Sneakers, AirPods, brownies, tutorías…" className="w-full bg-transparent text-base outline-none" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 150)} placeholder="Producto, categoría o vendedor…" className="w-full bg-transparent text-base outline-none" />
               {q && (
                 <button type="button" onClick={() => { setQ(""); set({ q: undefined }); }} aria-label="Limpiar">
                   <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               )}
             </div>
+            {focused && !q && recent.length > 0 && (
+              <div className="surface-card absolute left-0 right-14 top-full z-20 mt-2 p-3 animate-in fade-in slide-in-from-top-1">
+                <p className="eyebrow mb-2">Búsquedas recientes</p>
+                <div className="flex flex-wrap gap-2">
+                  {recent.map((r) => (
+                    <button key={r} type="button" onMouseDown={() => runSearch(r)} className="rounded-full bg-secondary px-3 py-1.5 text-sm hover:text-primary">{r}</button>
+                  ))}
+                </div>
+              </div>
+            )}
             <button type="button" onClick={() => setOpen((o) => !o)} className="relative flex h-12 w-12 items-center justify-center rounded-full border border-border hover:border-primary" aria-label="Filtros">
               <SlidersHorizontal className="h-5 w-5" />
               {activeCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[0.65rem] text-primary-foreground">{activeCount}</span>}
