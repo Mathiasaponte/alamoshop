@@ -1,21 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
 import type { Product } from "@/lib/data";
+import { productShare } from "@/lib/share";
 
 export function SellSuccess({ product }: { product: Product }) {
-  const url = typeof window !== "undefined" ? `${window.location.origin}/p/${product.id}` : `/p/${product.id}`;
-  const text = `Mira lo que publiqué en Álamos Shop: ${product.title}`;
-
-  const share = async () => {
-    if (navigator.share) {
-      try { await navigator.share({ title: product.title, text, url }); } catch { /* cancelado */ }
-      return;
-    }
-    await copy();
-  };
-  const copy = async () => {
-    try { await navigator.clipboard.writeText(url); toast.success("Link copiado"); } catch { toast.error("No se pudo copiar el link"); }
-  };
+  const { url, text, share, copy } = productShare(product);
 
   return (
     <div className="flex flex-col items-center py-10 text-center">

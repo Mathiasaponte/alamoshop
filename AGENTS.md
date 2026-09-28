@@ -13,3 +13,4 @@
 - Marketplace state (prefs, profile, favorites, orders, own listings) lives in `src/lib/store.tsx` (localStorage) with mock catalog in `src/lib/data.ts` — demo stage until Lovable Cloud tables replace it.
 - All app pages wrap content in `AppShell` (desktop header + mobile bottom nav) — keeps app-like mobile nav consistent.
 - Sell flow lives in `src/components/sell/` (SellFlow, SellPhotos, SellSuccess) with local draft + banned-word checks in `src/lib/sell.ts`; publishing always goes through store `publish()` — single source of truth.
+- Seller center (`/tienda`) is built from `src/components/seller/*`; only derives metrics from store data (no invented analytics); state changes go through `setProductStatus` ("paused" pauses, "removed" = soft delete). Share logic lives in `src/lib/share.ts`.

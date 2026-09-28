@@ -2,7 +2,7 @@ export type Campus = "Norte" | "Sur";
 export type Level = "Secundaria" | "Prepa";
 export type Condition = "Nuevo" | "Como nuevo" | "Buen estado" | "Usado";
 export type Delivery = "Campus Norte" | "Campus Sur" | "Ambos" | "Otro acuerdo";
-export type ProductStatus = "draft" | "pending" | "active" | "reserved" | "sold" | "removed";
+export type ProductStatus = "draft" | "pending" | "active" | "paused" | "reserved" | "sold" | "removed";
 
 export const CATEGORIES = [
   "Ropa",
