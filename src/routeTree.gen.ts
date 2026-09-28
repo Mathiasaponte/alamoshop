@@ -13,9 +13,13 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
+import { Route as NosotrosRouteImport } from './routes/nosotros'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as ReglasRouteImport } from './routes/reglas'
+import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TiendaRouteImport } from './routes/tienda'
+import { Route as TransparenciaRouteImport } from './routes/transparencia'
 import { Route as VenderRouteImport } from './routes/vender'
 import { Route as OrdenesIndexRouteImport } from './routes/ordenes.index'
 import { Route as OrdenesIdRouteImport } from './routes/ordenes.$id'
@@ -42,9 +46,19 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
   path: '/marketplace',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NosotrosRoute = NosotrosRouteImport.update({
+  id: '/nosotros',
+  path: '/nosotros',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadRoute = PrivacidadRouteImport.update({
+  id: '/privacidad',
+  path: '/privacidad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReglasRoute = ReglasRouteImport.update({
@@ -52,9 +66,19 @@ const ReglasRoute = ReglasRouteImport.update({
   path: '/reglas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TerminosRoute = TerminosRouteImport.update({
+  id: '/terminos',
+  path: '/terminos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TiendaRoute = TiendaRouteImport.update({
   id: '/tienda',
   path: '/tienda',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransparenciaRoute = TransparenciaRouteImport.update({
+  id: '/transparencia',
+  path: '/transparencia',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VenderRoute = VenderRouteImport.update({
@@ -88,9 +112,13 @@ export interface FileRoutesByFullPath {
   '/categorias': typeof CategoriasRoute
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nosotros': typeof NosotrosRoute
   '/perfil': typeof PerfilRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reglas': typeof ReglasRoute
+  '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
+  '/transparencia': typeof TransparenciaRoute
   '/vender': typeof VenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
@@ -102,9 +130,13 @@ export interface FileRoutesByTo {
   '/categorias': typeof CategoriasRoute
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nosotros': typeof NosotrosRoute
   '/perfil': typeof PerfilRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reglas': typeof ReglasRoute
+  '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
+  '/transparencia': typeof TransparenciaRoute
   '/vender': typeof VenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
@@ -117,9 +149,13 @@ export interface FileRoutesById {
   '/categorias': typeof CategoriasRoute
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
+  '/nosotros': typeof NosotrosRoute
   '/perfil': typeof PerfilRoute
+  '/privacidad': typeof PrivacidadRoute
   '/reglas': typeof ReglasRoute
+  '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
+  '/transparencia': typeof TransparenciaRoute
   '/vender': typeof VenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
@@ -133,9 +169,13 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/favoritos'
     | '/marketplace'
+    | '/nosotros'
     | '/perfil'
+    | '/privacidad'
     | '/reglas'
+    | '/terminos'
     | '/tienda'
+    | '/transparencia'
     | '/vender'
     | '/ordenes/$id'
     | '/p/$id'
@@ -147,9 +187,13 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/favoritos'
     | '/marketplace'
+    | '/nosotros'
     | '/perfil'
+    | '/privacidad'
     | '/reglas'
+    | '/terminos'
     | '/tienda'
+    | '/transparencia'
     | '/vender'
     | '/ordenes/$id'
     | '/p/$id'
@@ -161,9 +205,13 @@ export interface FileRouteTypes {
     | '/categorias'
     | '/favoritos'
     | '/marketplace'
+    | '/nosotros'
     | '/perfil'
+    | '/privacidad'
     | '/reglas'
+    | '/terminos'
     | '/tienda'
+    | '/transparencia'
     | '/vender'
     | '/ordenes/$id'
     | '/p/$id'
@@ -176,9 +224,13 @@ export interface RootRouteChildren {
   CategoriasRoute: typeof CategoriasRoute
   FavoritosRoute: typeof FavoritosRoute
   MarketplaceRoute: typeof MarketplaceRoute
+  NosotrosRoute: typeof NosotrosRoute
   PerfilRoute: typeof PerfilRoute
+  PrivacidadRoute: typeof PrivacidadRoute
   ReglasRoute: typeof ReglasRoute
+  TerminosRoute: typeof TerminosRoute
   TiendaRoute: typeof TiendaRoute
+  TransparenciaRoute: typeof TransparenciaRoute
   VenderRoute: typeof VenderRoute
   OrdenesIdRoute: typeof OrdenesIdRoute
   PIdRoute: typeof PIdRoute
@@ -216,11 +268,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketplaceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/nosotros': {
+      id: '/nosotros'
+      path: '/nosotros'
+      fullPath: '/nosotros'
+      preLoaderRoute: typeof NosotrosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/perfil': {
       id: '/perfil'
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidad': {
+      id: '/privacidad'
+      path: '/privacidad'
+      fullPath: '/privacidad'
+      preLoaderRoute: typeof PrivacidadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reglas': {
@@ -230,11 +296,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReglasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terminos': {
+      id: '/terminos'
+      path: '/terminos'
+      fullPath: '/terminos'
+      preLoaderRoute: typeof TerminosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tienda': {
       id: '/tienda'
       path: '/tienda'
       fullPath: '/tienda'
       preLoaderRoute: typeof TiendaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transparencia': {
+      id: '/transparencia'
+      path: '/transparencia'
+      fullPath: '/transparencia'
+      preLoaderRoute: typeof TransparenciaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vender': {
@@ -280,9 +360,13 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriasRoute: CategoriasRoute,
   FavoritosRoute: FavoritosRoute,
   MarketplaceRoute: MarketplaceRoute,
+  NosotrosRoute: NosotrosRoute,
   PerfilRoute: PerfilRoute,
+  PrivacidadRoute: PrivacidadRoute,
   ReglasRoute: ReglasRoute,
+  TerminosRoute: TerminosRoute,
   TiendaRoute: TiendaRoute,
+  TransparenciaRoute: TransparenciaRoute,
   VenderRoute: VenderRoute,
   OrdenesIdRoute: OrdenesIdRoute,
   PIdRoute: PIdRoute,
