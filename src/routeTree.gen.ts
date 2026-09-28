@@ -14,6 +14,7 @@ import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as ReglasRouteImport } from './routes/reglas'
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as VenderRouteImport } from './routes/vender'
 import { Route as OrdenesIndexRouteImport } from './routes/ordenes.index'
@@ -44,6 +45,11 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
 const PerfilRoute = PerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglasRoute = ReglasRouteImport.update({
+  id: '/reglas',
+  path: '/reglas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TiendaRoute = TiendaRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
   '/perfil': typeof PerfilRoute
+  '/reglas': typeof ReglasRoute
   '/tienda': typeof TiendaRoute
   '/vender': typeof VenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
   '/perfil': typeof PerfilRoute
+  '/reglas': typeof ReglasRoute
   '/tienda': typeof TiendaRoute
   '/vender': typeof VenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
   '/perfil': typeof PerfilRoute
+  '/reglas': typeof ReglasRoute
   '/tienda': typeof TiendaRoute
   '/vender': typeof VenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/marketplace'
     | '/perfil'
+    | '/reglas'
     | '/tienda'
     | '/vender'
     | '/ordenes/$id'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/marketplace'
     | '/perfil'
+    | '/reglas'
     | '/tienda'
     | '/vender'
     | '/ordenes/$id'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/favoritos'
     | '/marketplace'
     | '/perfil'
+    | '/reglas'
     | '/tienda'
     | '/vender'
     | '/ordenes/$id'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   FavoritosRoute: typeof FavoritosRoute
   MarketplaceRoute: typeof MarketplaceRoute
   PerfilRoute: typeof PerfilRoute
+  ReglasRoute: typeof ReglasRoute
   TiendaRoute: typeof TiendaRoute
   VenderRoute: typeof VenderRoute
   OrdenesIdRoute: typeof OrdenesIdRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglas': {
+      id: '/reglas'
+      path: '/reglas'
+      fullPath: '/reglas'
+      preLoaderRoute: typeof ReglasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tienda': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavoritosRoute: FavoritosRoute,
   MarketplaceRoute: MarketplaceRoute,
   PerfilRoute: PerfilRoute,
+  ReglasRoute: ReglasRoute,
   TiendaRoute: TiendaRoute,
   VenderRoute: VenderRoute,
   OrdenesIdRoute: OrdenesIdRoute,
