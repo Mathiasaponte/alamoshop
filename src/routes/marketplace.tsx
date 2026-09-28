@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { z } from "zod";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { ProductCard } from "@/components/ProductCard";
-import { CATEGORIES, CATEGORY_EMOJI, SELLERS, type Product } from "@/lib/data";
+import { CATEGORIES, CATEGORY_EMOJI, SELLERS } from "@/lib/data";
 import { useStore } from "@/lib/store";
 
 const searchSchema = z.object({
@@ -85,133 +85,145 @@ function Marketplace() {
     }
   };
 
+  const panel = open || (focused && !q);
+  const sellerHits = q.trim().length > 1 ? SELLERS.filter((s) => s.name.toLowerCase().includes(q.trim().toLowerCase())).slice(0, 4) : [];
+  const [shown, setShown] = useState(12);
+  useEffect(() => setShown(12), [search]);
+  const sentinel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver((e) => e[0].isIntersecting && setShown((n) => n + 8), { rootMargin: "400px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [results.length]);
+
   return (
     <AppShell>
-      <section className="border-b border-border bg-background">
-        <div className="mx-auto max-w-6xl px-4 pb-5 pt-6 md:px-6 md:pt-10">
-          <h1 className="font-display text-3xl text-primary md:text-4xl">¿Qué estás buscando?</h1>
+      <section className="sticky top-14 z-30 bg-background/95 backdrop-blur md:top-16">
+        <div className="mx-auto max-w-6xl px-4 py-3 md:px-6 md:py-5">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               runSearch(q);
+              setOpen(false);
+              (document.activeElement as HTMLElement | null)?.blur();
             }}
-            className="relative mt-4 flex items-center gap-2"
+            className="relative flex items-center gap-2"
           >
-            <div className="flex flex-1 items-center gap-3 rounded-full border border-border bg-secondary px-4 py-3 focus-within:border-primary">
+            <div className="flex flex-1 items-center gap-3 rounded-full bg-secondary px-5 py-3 ring-1 ring-transparent transition-all focus-within:bg-background focus-within:ring-primary/40">
               <Search className="h-5 w-5 text-muted-foreground" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 150)} placeholder="Producto, categoría o vendedor…" className="w-full bg-transparent text-base outline-none" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setTimeout(() => setFocused(false), 150)} placeholder="Buscar en Álamos Shop" className="w-full bg-transparent text-base outline-none" />
               {q && (
                 <button type="button" onClick={() => { setQ(""); set({ q: undefined }); }} aria-label="Limpiar">
                   <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               )}
             </div>
-            {focused && !q && recent.length > 0 && (
-              <div className="surface-card absolute left-0 right-14 top-full z-20 mt-2 p-3 animate-in fade-in slide-in-from-top-1">
-                <p className="eyebrow mb-2">Búsquedas recientes</p>
-                <div className="flex flex-wrap gap-2">
-                  {recent.map((r) => (
-                    <button key={r} type="button" onMouseDown={() => runSearch(r)} className="rounded-full bg-secondary px-3 py-1.5 text-sm hover:text-primary">{r}</button>
-                  ))}
-                </div>
+            <button type="button" onClick={() => setOpen((o) => !o)} className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-colors ${open ? "bg-primary text-primary-foreground" : "bg-secondary hover:text-primary"}`} aria-label="Filtros">
+              <SlidersHorizontal className="h-5 w-5" />
+              {activeCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[0.65rem] text-primary-foreground ring-2 ring-background">{activeCount}</span>}
+            </button>
+
+            {(panel || sellerHits.length > 0) && (
+              <div onMouseDown={(e) => e.preventDefault()} className="surface-card absolute left-0 right-0 top-full z-40 mt-2 max-h-[70vh] space-y-5 overflow-y-auto p-5 animate-in fade-in slide-in-from-top-2 duration-200">
+                {sellerHits.length > 0 && (
+                  <div>
+                    <p className="eyebrow mb-2">Vendedores</p>
+                    {sellerHits.map((s) => (
+                      <Link key={s.id} to="/u/$id" params={{ id: s.id }} className="flex items-center gap-3 rounded-md p-2 hover:bg-secondary">
+                        <Avatar initials={s.initials} size={32} />
+                        <span className="text-sm text-foreground">{s.name}</span>
+                        <span className="ml-auto text-xs text-muted-foreground">{s.level} · {s.campus}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                {panel && (
+                  <>
+                    {recent.length > 0 && (
+                      <div>
+                        <p className="eyebrow mb-2">Recientes</p>
+                        <div className="flex flex-wrap gap-2">
+                          {recent.map((r) => (
+                            <button key={r} type="button" onClick={() => { runSearch(r); setOpen(false); }} className="rounded-full bg-secondary px-3 py-1.5 text-sm hover:text-primary">{r}</button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <p className="eyebrow mb-2">Categorías</p>
+                      <div className="flex flex-wrap gap-2">
+                        {CATEGORIES.map((c) => (
+                          <Chip key={c} active={search.cat === c} onClick={() => set({ cat: search.cat === c ? undefined : c })}>{CATEGORY_EMOJI[c]} {c}</Chip>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div><p className="eyebrow mb-2">Campus</p><Seg value={campus} options={["Ambos", "Norte", "Sur"]} onChange={(v) => set({ campus: v as never })} /></div>
+                      <div><p className="eyebrow mb-2">Nivel</p><Seg value={level} options={["Todos", "Secundaria", "Prepa"]} onChange={(v) => set({ level: v as never })} /></div>
+                      <div><p className="eyebrow mb-2">Condición</p><Seg value={search.cond ?? "Todas"} options={["Todas", "Nuevo", "Usado"]} onChange={(v) => set({ cond: v === "Todas" ? undefined : (v as never) })} /></div>
+                      <div>
+                        <p className="eyebrow mb-2">Precio (MXN)</p>
+                        <div className="flex items-center gap-2">
+                          <PriceInput placeholder="Mín" value={search.min} onChange={(v) => set({ min: v })} />
+                          <span className="text-muted-foreground">–</span>
+                          <PriceInput placeholder="Máx" value={search.max} onChange={(v) => set({ max: v })} />
+                        </div>
+                      </div>
+                      <div>
+                        <p className="eyebrow mb-2">Ordenar</p>
+                        <select value={search.sort ?? "recientes"} onChange={(e) => set({ sort: e.target.value as never })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                          <option value="recientes">Más recientes</option>
+                          <option value="menor">Precio menor</option>
+                          <option value="mayor">Precio mayor</option>
+                          <option value="populares">Más populares</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-border pt-4">
+                      <button type="button" onClick={() => navigate({ search: {}, replace: true })} className="text-sm text-muted-foreground hover:text-primary">Limpiar</button>
+                      <button type="button" onClick={() => { setOpen(false); (document.activeElement as HTMLElement | null)?.blur(); }} className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary-deep">Ver {results.length} resultados</button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
-            <button type="button" onClick={() => setOpen((o) => !o)} className="relative flex h-12 w-12 items-center justify-center rounded-full border border-border hover:border-primary" aria-label="Filtros">
-              <SlidersHorizontal className="h-5 w-5" />
-              {activeCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[0.65rem] text-primary-foreground">{activeCount}</span>}
-            </button>
           </form>
-          <p className="mt-4 text-sm font-medium text-foreground">De estudiantes. Para estudiantes.</p>
-          <p className="text-xs text-muted-foreground">Encuentra productos, servicios y proyectos creados o vendidos por alumnos de Álamos.</p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-muted-foreground">Viendo:</span>
-            <Seg value={level} options={["Todos", "Secundaria", "Prepa"]} onChange={(v) => set({ level: v as never })} />
-            <Seg value={campus} options={["Ambos", "Norte", "Sur"]} onChange={(v) => set({ campus: v as never })} />
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-6xl overflow-x-auto px-4 pb-4 md:px-6 [scrollbar-width:none]">
-          <div className="flex gap-2">
-            <Chip active={!search.cat} onClick={() => set({ cat: undefined })}>Todo</Chip>
-            {CATEGORIES.map((c) => (
-              <Chip key={c} active={search.cat === c} onClick={() => set({ cat: search.cat === c ? undefined : c })}>
-                {CATEGORY_EMOJI[c]} {c}
-              </Chip>
-            ))}
-          </div>
-        </div>
-
-        {open && (
-          <div className="mx-auto max-w-6xl px-4 pb-6 md:px-6 animate-in fade-in slide-in-from-top-2">
-            <div className="surface-card grid gap-5 p-5 md:grid-cols-3">
-              <div>
-                <p className="eyebrow mb-2">Condición</p>
-                <Seg value={search.cond ?? "Todas"} options={["Todas", "Nuevo", "Usado"]} onChange={(v) => set({ cond: v === "Todas" ? undefined : (v as never) })} />
-              </div>
-              <div>
-                <p className="eyebrow mb-2">Precio (MXN)</p>
-                <div className="flex items-center gap-2">
-                  <PriceInput placeholder="Mín" value={search.min} onChange={(v) => set({ min: v })} />
-                  <span className="text-muted-foreground">–</span>
-                  <PriceInput placeholder="Máx" value={search.max} onChange={(v) => set({ max: v })} />
-                </div>
-              </div>
-              <div>
-                <p className="eyebrow mb-2">Ordenar</p>
-                <select value={search.sort ?? "recientes"} onChange={(e) => set({ sort: e.target.value as never })} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                  <option value="recientes">Más recientes</option>
-                  <option value="menor">Precio menor</option>
-                  <option value="mayor">Precio mayor</option>
-                  <option value="populares">Más populares</option>
-                </select>
-              </div>
-              <button onClick={() => navigate({ search: {}, replace: true })} className="text-left text-sm text-primary underline-offset-4 hover:underline md:col-span-3">
-                Limpiar filtros
-              </button>
+          {search.cat && (
+            <div className="mt-3 flex gap-2">
+              <Chip active onClick={() => set({ cat: undefined })}>{CATEGORY_EMOJI[search.cat]} {search.cat} <X className="ml-1 inline h-3 w-3" /></Chip>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </section>
 
-      {!filtering && results.length > 0 && (
-        <>
-          <Row title="Recién publicado" items={[...results].sort((a, b) => b.createdAt - a.createdAt).slice(0, 8)} />
-          <Row title="Popular cerca de ti" items={[...results].filter((p) => p.campus === campus || campus === "Ambos").sort((a, b) => b.likes - a.likes).slice(0, 8)} />
-        </>
-      )}
-
-      <section className="mx-auto max-w-6xl px-4 py-6 md:px-6">
-        {!filtering && <h2 className="mb-1 text-2xl text-primary">Todo el marketplace</h2>}
-        <p className="mb-4 text-sm text-muted-foreground">{results.length} {results.length === 1 ? "resultado" : "resultados"}</p>
+      <section className="mx-auto max-w-6xl px-4 pb-12 pt-2 md:px-6">
+        {filtering && <p className="mb-4 text-sm text-muted-foreground">{results.length} {results.length === 1 ? "resultado" : "resultados"}</p>}
         {results.length === 0 ? (
-          <div className="surface-card p-10 text-center">
+          <div className="py-20 text-center">
             <p className="font-display text-2xl text-primary">No encontramos nada por aquí todavía.</p>
-            <p className="mt-2 text-sm text-muted-foreground">Prueba otros filtros o sé el primero en publicarlo.</p>
-            <Link to="/vender" className="mt-5 inline-block rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground">+ Publicar producto</Link>
+            <p className="mt-2 text-sm text-muted-foreground">Prueba otra búsqueda o sé el primero en publicarlo.</p>
+            <Link to="/vender" className="mt-5 inline-block rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground">Publicar</Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
-            {results.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:gap-x-5 lg:grid-cols-4 xl:grid-cols-5">
+              {results.slice(0, shown).map((p, i) => (
+                <div key={p.id} className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${(i % 8) * 40}ms`, animationFillMode: "both" }}>
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </div>
+            {shown < results.length && (
+              <div ref={sentinel} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="aspect-square animate-pulse rounded-xl bg-muted" />
+                ))}
+              </div>
+            )}
+          </>
         )}
-      </section>
-
-      <section className="mx-auto max-w-6xl px-4 pb-12 md:px-6">
-        <h2 className="text-2xl text-primary">Vendedores activos</h2>
-        <p className="text-xs text-muted-foreground">Perfiles reales de estudiantes. Compra dentro de tu comunidad.</p>
-        <div className="mt-4 flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none]">
-          {SELLERS.map((s) => (
-            <Link key={s.id} to="/u/$id" params={{ id: s.id }} className="surface-card flex w-44 shrink-0 flex-col items-center p-4 text-center transition-transform hover:-translate-y-0.5">
-              <Avatar initials={s.initials} size={52} />
-              <p className="mt-3 text-sm font-medium text-foreground">{s.name}</p>
-              <p className="text-xs text-muted-foreground">{s.level} · {s.campus}</p>
-              <p className="mt-1 text-xs text-muted-foreground">⭐ {s.rating.toFixed(1)} · {s.sales} ventas</p>
-            </Link>
-          ))}
-        </div>
       </section>
     </AppShell>
   );
