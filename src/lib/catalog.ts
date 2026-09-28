@@ -3,16 +3,11 @@ import type { Campus, Category, Condition, Delivery, Level, Product } from "./da
 
 export const PAGE_SIZE = 12;
 
+type Opt<T> = T | undefined;
 export type CatalogFilters = {
-  q?: string;
-  cat?: string;
-  campus?: string;
-  level?: string;
-  cond?: "Nuevo" | "Usado";
-  min?: number;
-  max?: number;
-  sort?: "recientes" | "menor" | "mayor" | "populares";
-  sellerId?: string;
+  q?: Opt<string>; cat?: Opt<string>; campus?: Opt<string>; level?: Opt<string>;
+  cond?: Opt<"Nuevo" | "Usado">; min?: Opt<number>; max?: Opt<number>;
+  sort?: Opt<"recientes" | "menor" | "mayor" | "populares">; sellerId?: Opt<string>;
 };
 
 const SELECT =
