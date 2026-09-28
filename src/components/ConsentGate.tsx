@@ -24,6 +24,7 @@ export function ConsentGate() {
       <div className="animate-in slide-in-from-bottom-6 fade-in max-h-[92vh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-background p-6 shadow-2xl duration-300 md:rounded-2xl">
         <Logo variant="emblem" size={44} />
         <h2 id="consent-title" className="mt-4 text-3xl text-primary">Antes de entrar</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Seis acuerdos simples para que todos estemos bien.</p>
         <ul className="mt-5 space-y-2.5">
           {POINTS.map((p, i) => (
             <li key={p} className="flex items-baseline gap-3 text-sm">
@@ -33,11 +34,11 @@ export function ConsentGate() {
           ))}
         </ul>
         <div className="mt-6 space-y-3 border-t border-border pt-5 text-sm">
-          <label className="flex items-start gap-3">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg p-1 -m-1 hover:bg-secondary">
             <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
             <span>He leído y acepto los <Link to="/terminos" target="_blank" className="text-primary underline">Términos y Condiciones</Link>.</span>
           </label>
-          <label className="flex items-start gap-3">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg p-1 -m-1 hover:bg-secondary">
             <input type="checkbox" checked={privacy} onChange={(e) => setPrivacy(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
             <span>He leído el <Link to="/privacidad" target="_blank" className="text-primary underline">Aviso de Privacidad</Link>.</span>
           </label>

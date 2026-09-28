@@ -83,7 +83,7 @@ function Nosotros() {
         </Section>
 
         <section className="bg-primary text-primary-foreground">
-          <div className="mx-auto max-w-3xl px-5 py-20 text-center md:px-6">
+          <div className="mx-auto max-w-3xl px-5 py-16 md:py-24 text-center md:px-6">
             <Reveal>
               <p className="font-display text-3xl leading-tight md:text-5xl">Si nuestra comunidad hace crecer Álamos Shop, Álamos Shop debe devolver valor a nuestra comunidad.</p>
               <div className="mx-auto mt-8 space-y-1 text-sm opacity-80">
@@ -119,7 +119,7 @@ function Nosotros() {
           </ul>
         </Section>
 
-        <Section eyebrow="Los $10" title="Por cada $10 de publicidad">
+        <Section eyebrow="Los $10" title="Por cada $10 de publicidad normal">
           <SplitBar total={10} parts={[{ label: "Fondo de Graduación", amount: 4.5, tone: "gold" }, { label: "Álamos Shop", amount: 5.5, tone: "primary" }]} />
           <p className="mt-8 text-sm leading-relaxed text-muted-foreground">Los $5.50 que permanecen en Álamos Shop ayudan a financiar operación, desarrollo, infraestructura, moderación y crecimiento.</p>
         </Section>
@@ -136,7 +136,7 @@ function Nosotros() {
 
         <Section eyebrow="Campañas sociales" title="Cuando la comunidad se une por una causa.">
           <p className="leading-relaxed">Solo aplican cuando una iniciativa ha llegado directamente a la comunidad de Álamos o tiene contexto previo en ella. Ningún usuario puede crear campañas; en el futuro solo las activará el equipo administrador.</p>
-          <p className="mt-8 eyebrow">Durante una campaña social, por cada $10</p>
+          <p className="mt-8 eyebrow">Durante una campaña social</p>
           <div className="mt-4">
             <SplitBar total={10} parts={[{ label: "Graduación", amount: 4.5, tone: "gold" }, { label: "Causa social", amount: 2, tone: "muted" }, { label: "Álamos Shop", amount: 3.5, tone: "primary" }]} />
           </div>
@@ -166,7 +166,7 @@ function Nosotros() {
         )}
 
         <Section>
-          <p className="text-sm text-muted-foreground">PEAK desarrolla y opera la tecnología detrás de Álamos Shop.</p>
+          <div className="flex flex-col items-center gap-2 text-center"><div className="rule-gold h-px w-16" /><p className="mt-3 text-[0.7rem] uppercase tracking-[0.24em] text-muted-foreground">Built by <span className="font-semibold text-foreground">PEAK</span></p><p className="text-sm text-muted-foreground">PEAK desarrolla y opera la tecnología detrás de Álamos Shop.</p></div>
         </Section>
       </div>
     </AppShell>

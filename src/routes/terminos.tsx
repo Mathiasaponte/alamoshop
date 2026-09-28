@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/AppShell";
 import { InfoHero, Section, Accordion, Toc } from "@/components/info/InfoParts";
-import { CONTACT_EMAIL, LEGAL_UPDATED, TERMS_VERSION } from "@/lib/legal";
+import { LEGAL_UPDATED, TERMS_VERSION } from "@/lib/legal";
 
 export const Route = createFileRoute("/terminos")({
   head: () => ({
@@ -35,7 +35,7 @@ const S: { id: string; t: string; c: ReactNode }[] = [
   { id: "propiedad", t: "Propiedad intelectual", c: <p>Solo publica fotos y textos que te pertenezcan o que tengas permiso de usar. La marca y el diseño de Álamos Shop no pueden usarse sin autorización.</p> },
   { id: "suspension", t: "Suspensión", c: <p>Podemos suspender cuentas que incumplan de forma grave o repetida estos términos.</p> },
   { id: "cambios", t: "Cambios", c: <p>Podemos actualizar estos términos. Cuando cambie la versión, te pediremos aceptarla de nuevo.</p> },
-  { id: "contacto", t: "Contacto", c: <p>Escríbenos a <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline">{CONTACT_EMAIL}</a>.</p> },
+  { id: "contacto", t: "Contacto", c: <p>Pronto habilitaremos un canal de contacto oficial. Mientras tanto, puedes usar la opción “Reportar” dentro de la app.</p> },
 ];
 
 function Terminos() {
@@ -43,7 +43,7 @@ function Terminos() {
     <AppShell>
       <div className="bg-background">
         <InfoHero eyebrow={`Versión ${TERMS_VERSION} · Última actualización: ${LEGAL_UPDATED}`} title="Términos y Condiciones" subtitle="En lenguaje claro. Toca cada sección para leerla." />
-        <Section tone="soft"><Toc items={S.map((s) => ({ id: s.id, label: s.t }))} /></Section>
+        <Section tone="soft" eyebrow="Índice"><Toc items={S.map((s) => ({ id: s.id, label: s.t }))} /></Section>
         <Section>{S.map((s, i) => <Accordion key={s.id} id={s.id} title={`${i + 1}. ${s.t}`} defaultOpen={i === 0}>{s.c}</Accordion>)}</Section>
       </div>
     </AppShell>
