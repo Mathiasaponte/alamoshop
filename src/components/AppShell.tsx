@@ -2,6 +2,16 @@ import { Link } from "@tanstack/react-router";
 import { Home, Search, PlusCircle, Receipt, User, Heart } from "lucide-react";
 import type { ReactNode } from "react";
 import { Logo } from "./Logo";
+import { ConsentGate } from "./ConsentGate";
+import { CONTACT_EMAIL } from "@/lib/legal";
+
+const footer = [
+  { to: "/nosotros", label: "Nosotros" },
+  { to: "/transparencia", label: "Transparencia" },
+  { to: "/terminos", label: "Términos" },
+  { to: "/privacidad", label: "Privacidad" },
+  { to: "/reglas", label: "Reglas" },
+] as const;
 
 const desktop = [
   { to: "/marketplace", label: "Marketplace" },
@@ -54,6 +64,25 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="animate-in fade-in duration-300">{children}</main>
+
+      <footer className="border-t border-border bg-background">
+        <div className="mx-auto max-w-6xl px-4 py-10 md:px-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <Logo variant="lockup" size={28} />
+            <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+              {footer.map((l) => (
+                <Link key={l.to} to={l.to} className="hover:text-primary">{l.label}</Link>
+              ))}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-primary">Contacto</a>
+            </nav>
+          </div>
+          <div className="mt-6 flex flex-col gap-1 text-xs text-muted-foreground md:flex-row md:justify-between">
+            <p>Álamos Shop es una plataforma independiente.</p>
+            <p className="tracking-[0.18em] uppercase">Built by <span className="font-semibold text-foreground">PEAK</span></p>
+          </div>
+        </div>
+      </footer>
+      <ConsentGate />
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="grid grid-cols-5">
