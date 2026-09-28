@@ -62,7 +62,7 @@ export function SellFlow() {
   useEffect(() => () => window.clearTimeout(advanceTimer.current), []);
 
   const idx = Math.min(d.step, steps.length - 1);
-  const id = steps[idx];
+  const id: StepId = steps[idx] ?? "tipo";
   const set = (p: Partial<SellDraft>) => { setError(null); setD((s) => ({ ...s, ...p })); };
 
   const validate = (step: StepId): string | null => {
@@ -321,7 +321,7 @@ export function SellFlow() {
   );
 }
 
-function Frame({ children, footer, onClose, onBack, progress }: { children: ReactNode; footer?: ReactNode; onClose: () => void; onBack?: () => void; progress?: { current: number; total: number } }) {
+function Frame({ children, footer, onClose, onBack, progress }: { children: ReactNode; footer?: ReactNode; onClose: () => void; onBack?: (() => void) | undefined; progress?: { current: number; total: number } | undefined }) {
   return (
     <div className="min-h-dvh bg-secondary md:py-10">
       <div className="mx-auto flex min-h-dvh max-w-xl flex-col bg-background animate-in slide-in-from-bottom-10 fade-in duration-500 md:min-h-[min(760px,calc(100dvh-5rem))] md:rounded-3xl md:shadow-[var(--shadow-card)] md:ring-1 md:ring-border">

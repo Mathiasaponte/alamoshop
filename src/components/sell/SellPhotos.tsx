@@ -38,11 +38,11 @@ export function SellPhotos({ images, onChange }: { images: string[]; onChange: (
     const j = i + d;
     if (j < 0 || j >= images.length) return;
     const n = [...images];
-    [n[i], n[j]] = [n[j], n[i]];
+    const a = n[i]!; n[i] = n[j]!; n[j] = a;
     onChange(n);
   };
 
-  const cover = (i: number) => onChange([images[i], ...images.filter((_, k) => k !== i)]);
+  const cover = (i: number) => onChange([images[i]!, ...images.filter((_, k) => k !== i)]);
 
   return (
     <div>
