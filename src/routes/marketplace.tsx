@@ -100,7 +100,7 @@ function Marketplace() {
 
   return (
     <AppShell>
-      <section className="sticky top-14 z-30 bg-background/95 backdrop-blur md:top-16">
+      <section className="sticky top-[59px] z-20 bg-background/95 backdrop-blur">
         <div className="mx-auto max-w-6xl px-4 py-3 md:px-6 md:py-5">
           <form
             onSubmit={(e) => {
