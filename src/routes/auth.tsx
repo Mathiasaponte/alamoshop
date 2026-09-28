@@ -9,7 +9,7 @@ import type { Campus, Level } from "@/lib/data";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>): { redirect?: string } =>
-    typeof s.redirect === "string" && s.redirect.startsWith("/") && !s.redirect.startsWith("//") ? { redirect: s.redirect } : {},
+    typeof s['redirect'] === "string" && s['redirect'].startsWith("/") && !s['redirect'].startsWith("//") ? { redirect: s['redirect'] } : {},
   head: () => ({
     meta: [
       { title: "Entrar — Álamos Shop" },

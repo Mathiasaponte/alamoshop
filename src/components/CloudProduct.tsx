@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
@@ -6,7 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { useImageUrls } from "@/lib/images";
 
 /** Vista mínima de un producto real guardado en Cloud (temporal hasta migrar /p/$id completa). */
-export function CloudProduct({ id, fallback }: { id: string; fallback: React.ReactNode }) {
+export function CloudProduct({ id, fallback }: { id: string; fallback: ReactNode }) {
   const { data, isLoading } = useQuery({
     queryKey: ["cloud-product", id],
     enabled: /^[0-9a-f-]{36}$/i.test(id),
