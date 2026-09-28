@@ -10,17 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CategoriasRouteImport } from './routes/categorias'
 import { Route as FavoritosRouteImport } from './routes/favoritos'
 import { Route as MarketplaceRouteImport } from './routes/marketplace'
 import { Route as NosotrosRouteImport } from './routes/nosotros'
-import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as PrivacidadRouteImport } from './routes/privacidad'
 import { Route as ReglasRouteImport } from './routes/reglas'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as TransparenciaRouteImport } from './routes/transparencia'
 import { Route as VenderRouteImport } from './routes/vender'
+import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as OrdenesIndexRouteImport } from './routes/ordenes.index'
 import { Route as OrdenesIdRouteImport } from './routes/ordenes.$id'
 import { Route as PIdRouteImport } from './routes/p.$id'
@@ -29,6 +31,15 @@ import { Route as UIdRouteImport } from './routes/u.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriasRoute = CategoriasRouteImport.update({
@@ -49,11 +60,6 @@ const MarketplaceRoute = MarketplaceRouteImport.update({
 const NosotrosRoute = NosotrosRouteImport.update({
   id: '/nosotros',
   path: '/nosotros',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadRoute = PrivacidadRouteImport.update({
@@ -86,6 +92,11 @@ const VenderRoute = VenderRouteImport.update({
   path: '/vender',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const OrdenesIndexRoute = OrdenesIndexRouteImport.update({
   id: '/ordenes/',
   path: '/ordenes/',
@@ -109,17 +120,18 @@ const UIdRoute = UIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
   '/nosotros': typeof NosotrosRoute
-  '/perfil': typeof PerfilRoute
   '/privacidad': typeof PrivacidadRoute
   '/reglas': typeof ReglasRoute
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
   '/transparencia': typeof TransparenciaRoute
   '/vender': typeof VenderRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
@@ -127,17 +139,18 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
   '/nosotros': typeof NosotrosRoute
-  '/perfil': typeof PerfilRoute
   '/privacidad': typeof PrivacidadRoute
   '/reglas': typeof ReglasRoute
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
   '/transparencia': typeof TransparenciaRoute
   '/vender': typeof VenderRoute
+  '/perfil': typeof AuthenticatedPerfilRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
@@ -146,17 +159,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/categorias': typeof CategoriasRoute
   '/favoritos': typeof FavoritosRoute
   '/marketplace': typeof MarketplaceRoute
   '/nosotros': typeof NosotrosRoute
-  '/perfil': typeof PerfilRoute
   '/privacidad': typeof PrivacidadRoute
   '/reglas': typeof ReglasRoute
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
   '/transparencia': typeof TransparenciaRoute
   '/vender': typeof VenderRoute
+  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
@@ -166,17 +181,18 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/categorias'
     | '/favoritos'
     | '/marketplace'
     | '/nosotros'
-    | '/perfil'
     | '/privacidad'
     | '/reglas'
     | '/terminos'
     | '/tienda'
     | '/transparencia'
     | '/vender'
+    | '/perfil'
     | '/ordenes/$id'
     | '/p/$id'
     | '/u/$id'
@@ -184,17 +200,18 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/categorias'
     | '/favoritos'
     | '/marketplace'
     | '/nosotros'
-    | '/perfil'
     | '/privacidad'
     | '/reglas'
     | '/terminos'
     | '/tienda'
     | '/transparencia'
     | '/vender'
+    | '/perfil'
     | '/ordenes/$id'
     | '/p/$id'
     | '/u/$id'
@@ -202,17 +219,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
+    | '/auth'
     | '/categorias'
     | '/favoritos'
     | '/marketplace'
     | '/nosotros'
-    | '/perfil'
     | '/privacidad'
     | '/reglas'
     | '/terminos'
     | '/tienda'
     | '/transparencia'
     | '/vender'
+    | '/_authenticated/perfil'
     | '/ordenes/$id'
     | '/p/$id'
     | '/u/$id'
@@ -221,11 +240,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   CategoriasRoute: typeof CategoriasRoute
   FavoritosRoute: typeof FavoritosRoute
   MarketplaceRoute: typeof MarketplaceRoute
   NosotrosRoute: typeof NosotrosRoute
-  PerfilRoute: typeof PerfilRoute
   PrivacidadRoute: typeof PrivacidadRoute
   ReglasRoute: typeof ReglasRoute
   TerminosRoute: typeof TerminosRoute
@@ -245,6 +265,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categorias': {
@@ -273,13 +307,6 @@ declare module '@tanstack/react-router' {
       path: '/nosotros'
       fullPath: '/nosotros'
       preLoaderRoute: typeof NosotrosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidad': {
@@ -324,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VenderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/perfil': {
+      id: '/_authenticated/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/ordenes/': {
       id: '/ordenes/'
       path: '/ordenes'
@@ -355,13 +389,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   CategoriasRoute: CategoriasRoute,
   FavoritosRoute: FavoritosRoute,
   MarketplaceRoute: MarketplaceRoute,
   NosotrosRoute: NosotrosRoute,
-  PerfilRoute: PerfilRoute,
   PrivacidadRoute: PrivacidadRoute,
   ReglasRoute: ReglasRoute,
   TerminosRoute: TerminosRoute,
