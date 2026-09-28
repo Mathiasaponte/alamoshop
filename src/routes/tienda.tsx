@@ -30,7 +30,7 @@ type Tab = (typeof TABS)[number];
 function Tienda() {
   const { myProducts, orders, getProduct, hydrated } = useStore();
   const [tab, setTab] = useState<Tab>("Resumen");
-  const [group, setGroup] = useState(ORDER_GROUPS[0].key);
+  const [group, setGroup] = useState<(typeof ORDER_GROUPS)[number]["key"]>("solicitud");
   const [draft, setDraft] = useState<string | null>(null);
 
   useEffect(() => {
