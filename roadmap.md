@@ -6,9 +6,9 @@
 - [x] Bucket product-images (privado: la política del workspace bloquea buckets públicos — usuario debe activarla en Settings → Privacy & Security)
 - [x] Auth: /auth (entrar/crear cuenta, prefill desde onboarding), gate _authenticated, header según sesión, cerrar sesión
 - [x] Perfil conectado al backend (profiles + private_contacts vía server fns)
-- [x] Sell flow → subir fotos + crear producto en backend (falta prueba real con cuenta)
-- [ ] Marketplace/búsqueda/paginación desde backend (sin mezclar mock)
-- [ ] Producto, perfil vendedor, favoritos (con migración de locales)
+- [x] Sell flow → backend (probado con 2 cuentas)
+- [x] Marketplace/búsqueda/paginación, producto y perfil vendedor desde backend
+- [ ] Favoritos (con migración de locales) + botón Solicitar compra en /p/$id
 - [ ] Órdenes comprador/vendedor + realtime + contacto seguro + reseñas
 - [ ] Reportes y consentimiento en backend
 - [ ] Prueba de dos cuentas de punta a punta

@@ -19,3 +19,4 @@
 - Contacts (instagram/whatsapp) live in `private_contacts` (owner-only) and are shared only through `get_order_contact` after acceptance — never exposed publicly.
 - Product image URLs resolve only through `src/lib/images.ts` (signed URLs today, swap to getPublicUrl when bucket is public); DB stores only storage_path — signed URLs expire.
 - Publishing goes through `src/lib/publish.ts` (upload → insert product → insert product_images, cleanup to status removed on failure); seller_id always from session.
+- Public catalog reads go through `src/lib/catalog.ts` (server-side filters/search, 12 per page via range); marketplace, /p/$id and /u/$id read only Cloud — no mock mixing.
