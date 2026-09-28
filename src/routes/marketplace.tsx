@@ -93,7 +93,7 @@ function Marketplace() {
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
-    const io = new IntersectionObserver((e) => e[0].isIntersecting && setShown((n) => n + 8), { rootMargin: "400px" });
+    const io = new IntersectionObserver((e) => e[0]?.isIntersecting && setShown((n) => n + 8), { rootMargin: "400px" });
     io.observe(el);
     return () => io.disconnect();
   }, [results.length]);
@@ -226,22 +226,6 @@ function Marketplace() {
         )}
       </section>
     </AppShell>
-  );
-}
-
-function Row({ title, items }: { title: string; items: Product[] }) {
-  if (items.length === 0) return null;
-  return (
-    <section className="mx-auto max-w-6xl px-4 pt-6 md:px-6">
-      <h2 className="text-2xl text-primary">{title}</h2>
-      <div className="-mx-4 mt-3 flex snap-x gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:px-0">
-        {items.map((p) => (
-          <div key={p.id} className="w-40 shrink-0 snap-start sm:w-48">
-            <ProductCard product={p} />
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }
 
