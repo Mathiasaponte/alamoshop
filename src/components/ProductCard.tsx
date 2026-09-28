@@ -4,18 +4,22 @@ import { Heart } from "lucide-react";
 import { formatPrice, type Product } from "@/lib/data";
 import { useStore } from "@/lib/store";
 import { toast } from "sonner";
+import { useImageUrls } from "@/lib/images";
 
 export function ProductCard({ product }: { product: Product }) {
   const { getSeller, favorites, toggleFavorite } = useStore();
   const seller = getSeller(product.sellerId);
   const fav = favorites.includes(product.id);
   const [loaded, setLoaded] = useState(false);
+  const { data: urls } = useImageUrls(product.imagePath ? [product.imagePath] : []);
+  const cover = product.imagePath ? urls?.[0] : product.images[0];
+  const sellerName = product.sellerName ?? seller?.name;
   return (
     <Link to="/p/$id" params={{ id: product.id }} className="group block">
       <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
-        {product.images[0] ? (
+        {cover ? (
           <img
-            src={product.images[0]}
+            src={cover}
             alt={product.title}
             loading="lazy"
             onLoad={() => setLoaded(true)}
@@ -43,7 +47,7 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="px-0.5 pt-2.5">
         <p className="text-base font-semibold text-foreground">{formatPrice(product.price)}</p>
         <p className="truncate text-sm text-foreground/80">{product.title}</p>
-        {seller && <p className="truncate text-xs text-muted-foreground">{seller.name}</p>}
+        {sellerName && <p className="truncate text-xs text-muted-foreground">{sellerName}</p>}
       </div>
     </Link>
   );

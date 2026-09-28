@@ -61,6 +61,10 @@ export type Product = {
   status: ProductStatus;
   createdAt: number;
   likes: number;
+  /** Cloud: ruta de portada en Storage (se resuelve a URL con src/lib/images.ts) */
+  imagePath?: string | undefined;
+  /** Cloud: nombre público del vendedor */
+  sellerName?: string | undefined;
 };
 
 export type Review = { id: string; sellerId: string; author: string; stars: number; text: string };

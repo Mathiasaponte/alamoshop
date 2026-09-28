@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { z } from "zod";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { ProductCard } from "@/components/ProductCard";
-import { CATEGORIES, CATEGORY_EMOJI, SELLERS } from "@/lib/data";
+import { CATEGORIES, CATEGORY_EMOJI } from "@/lib/data";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { fetchCatalogPage, searchSellers, PAGE_SIZE } from "@/lib/catalog";
 import { useStore } from "@/lib/store";
 
 const searchSchema = z.object({
@@ -34,7 +36,7 @@ export const Route = createFileRoute("/marketplace")({
 function Marketplace() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/marketplace" });
-  const { allProducts, prefs, getSeller } = useStore();
+  const { prefs } = useStore();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState(search.q ?? "");
 
@@ -43,29 +45,16 @@ function Marketplace() {
   const set = (patch: Partial<z.infer<typeof searchSchema>>) =>
     navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
-  const results = useMemo(() => {
-    let list = allProducts.filter((p) => p.status === "active" || p.status === "reserved");
-    if (search.q) {
-      const t = search.q.toLowerCase();
-      list = list.filter((p) => `${p.title} ${p.description} ${p.category} ${getSeller(p.sellerId)?.name ?? ""}`.toLowerCase().includes(t));
-    }
-    if (search.cat) list = list.filter((p) => p.category === search.cat);
-    if (search.cond === "Nuevo") list = list.filter((p) => p.condition === "Nuevo");
-    if (search.cond === "Usado") list = list.filter((p) => p.condition !== "Nuevo");
-    if (search.min != null) list = list.filter((p) => p.price >= search.min!);
-    if (search.max != null) list = list.filter((p) => p.price <= search.max!);
-    // Campus/level personalize ordering but never hide the other campus unless explicitly chosen.
-    if (search.campus && search.campus !== "Ambos") list = list.filter((p) => p.campus === search.campus || p.delivery.includes("Ambos"));
-    if (search.level && search.level !== "Todos") list = list.filter((p) => p.level === search.level);
-    const score = (p: (typeof list)[number]) => (p.campus === campus ? 2 : 0) + (p.level === level ? 1 : 0);
-    const sort = search.sort ?? "recientes";
-    return [...list].sort((a, b) => {
-      if (sort === "menor") return a.price - b.price;
-      if (sort === "mayor") return b.price - a.price;
-      if (sort === "populares") return b.likes - a.likes;
-      return score(b) - score(a) || b.createdAt - a.createdAt;
-    });
-  }, [allProducts, search, campus, level, getSeller]);
+  // Campus/nivel del onboarding solo filtran si el usuario los eligió explícitamente
+  const qFilters = { ...search };
+  const catalog = useInfiniteQuery({
+    queryKey: ["catalog", qFilters],
+    queryFn: ({ pageParam }) => fetchCatalogPage(qFilters, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (last) => ((last.page + 1) * PAGE_SIZE < last.count ? last.page + 1 : undefined),
+  });
+  const results = catalog.data?.pages.flatMap((p) => p.items) ?? [];
+  const total = catalog.data?.pages[0]?.count ?? 0;
 
   const activeCount = [search.cat, search.cond, search.min, search.max, search.sort].filter((x) => x != null).length;
   const filtering = activeCount > 0 || !!search.q;
@@ -86,17 +75,16 @@ function Marketplace() {
   };
 
   const panel = open || (focused && !q);
-  const sellerHits = q.trim().length > 1 ? SELLERS.filter((s) => s.name.toLowerCase().includes(q.trim().toLowerCase())).slice(0, 4) : [];
-  const [shown, setShown] = useState(12);
-  useEffect(() => setShown(12), [search]);
+  const { data: sellerRows = [] } = useQuery({ queryKey: ["seller-search", q.trim()], queryFn: () => searchSellers(q), enabled: q.trim().length > 1 });
+  const sellerHits = sellerRows.map((s) => ({ id: s.id, name: s.display_name || "Estudiante", initials: (s.display_name || "E").split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase(), level: s.level ?? "", campus: s.campus ?? "" }));
   const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinel.current;
     if (!el) return;
-    const io = new IntersectionObserver((e) => e[0]?.isIntersecting && setShown((n) => n + 8), { rootMargin: "400px" });
+    const io = new IntersectionObserver((e) => { if (e[0]?.isIntersecting && catalog.hasNextPage && !catalog.isFetchingNextPage) void catalog.fetchNextPage(); }, { rootMargin: "400px" });
     io.observe(el);
     return () => io.disconnect();
-  }, [results.length]);
+  }, [results.length, catalog.hasNextPage, catalog.isFetchingNextPage]);
 
   return (
     <AppShell>
@@ -183,7 +171,7 @@ function Marketplace() {
                     </div>
                     <div className="flex items-center justify-between border-t border-border pt-4">
                       <button type="button" onClick={() => navigate({ search: {}, replace: true })} className="text-sm text-muted-foreground hover:text-primary">Limpiar</button>
-                      <button type="button" onClick={() => { setOpen(false); (document.activeElement as HTMLElement | null)?.blur(); }} className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary-deep">Ver {results.length} resultados</button>
+                      <button type="button" onClick={() => { setOpen(false); (document.activeElement as HTMLElement | null)?.blur(); }} className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary-deep">Ver {total} resultados</button>
                     </div>
                   </>
                 )}
@@ -199,8 +187,23 @@ function Marketplace() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pb-12 pt-2 md:px-6">
-        {filtering && <p className="mb-4 text-sm text-muted-foreground">{results.length} {results.length === 1 ? "resultado" : "resultados"}</p>}
-        {results.length === 0 ? (
+        {filtering && !catalog.isPending && !catalog.isError && <p className="mb-4 text-sm text-muted-foreground">{total} {total === 1 ? "resultado" : "resultados"}</p>}
+        {catalog.isPending ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {Array.from({ length: 8 }).map((_, i) => <div key={i} className="aspect-square animate-pulse rounded-xl bg-muted" />)}
+          </div>
+        ) : catalog.isError ? (
+          <div className="py-20 text-center">
+            <p className="font-display text-2xl text-primary">No pudimos cargar el marketplace.</p>
+            <button onClick={() => void catalog.refetch()} className="mt-5 inline-block rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground">Reintentar</button>
+          </div>
+        ) : results.length === 0 && !filtering ? (
+          <div className="py-20 text-center">
+            <p className="font-display text-2xl text-primary">Todavía no hay publicaciones.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Sé el primero en publicar algo.</p>
+            <Link to="/vender" className="mt-5 inline-block rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground">Publicar</Link>
+          </div>
+        ) : results.length === 0 ? (
           <div className="py-20 text-center">
             <p className="font-display text-2xl text-primary">No encontramos nada por aquí todavía.</p>
             <p className="mt-2 text-sm text-muted-foreground">Prueba otra búsqueda o sé el primero en publicarlo.</p>
@@ -209,13 +212,13 @@ function Marketplace() {
         ) : (
           <>
             <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:gap-x-5 lg:grid-cols-4 xl:grid-cols-5">
-              {results.slice(0, shown).map((p, i) => (
+              {results.map((p, i) => (
                 <div key={p.id} className="animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ animationDelay: `${(i % 8) * 40}ms`, animationFillMode: "both" }}>
                   <ProductCard product={p} />
                 </div>
               ))}
             </div>
-            {shown < results.length && (
+            {catalog.hasNextPage && (
               <div ref={sentinel} className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="aspect-square animate-pulse rounded-xl bg-muted" />
