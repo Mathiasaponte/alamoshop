@@ -27,7 +27,7 @@ export function SellerStat({ label, value, hint, delay = 0 }: { label: string; v
       {value === null ? (
         <p className="mt-2 text-sm text-muted-foreground">Aún sin datos</p>
       ) : (
-        <p className="mt-1 font-display text-3xl text-foreground">{value}</p>
+        <p className="mt-1 text-2xl font-medium tabular-nums text-foreground md:text-3xl">{value}</p>
       )}
       {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
     </div>
