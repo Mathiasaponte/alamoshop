@@ -1,9 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { AppShell } from "@/components/AppShell";
+import { createFileRoute } from "@tanstack/react-router";
 import { SellFlow } from "@/components/sell/SellFlow";
-import { useStore } from "@/lib/store";
 
-export const Route = createFileRoute("/vender")({
+export const Route = createFileRoute("/_authenticated/vender")({
   head: () => ({
     meta: [
       { title: "Publicar — Álamos Shop" },
@@ -14,26 +12,5 @@ export const Route = createFileRoute("/vender")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: Vender,
+  component: SellFlow,
 });
-
-function Vender() {
-  const { profile, hydrated } = useStore();
-
-  if (!hydrated) return <div className="min-h-dvh bg-secondary" />;
-
-  if (!profile) {
-    return (
-      <AppShell>
-        <div className="mx-auto max-w-md px-6 py-20 text-center">
-          <p className="eyebrow">Modo vendedor</p>
-          <h1 className="mt-3 text-4xl text-primary">Crea tu perfil para vender</h1>
-          <p className="mt-3 text-sm text-muted-foreground">Solo toma un minuto. Tus datos de contacto nunca se muestran públicamente.</p>
-          <Link to="/perfil" className="mt-8 inline-block rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground">Crear mi perfil</Link>
-        </div>
-      </AppShell>
-    );
-  }
-
-  return <SellFlow />;
-}

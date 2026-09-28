@@ -21,8 +21,8 @@ import { Route as ReglasRouteImport } from './routes/reglas'
 import { Route as TerminosRouteImport } from './routes/terminos'
 import { Route as TiendaRouteImport } from './routes/tienda'
 import { Route as TransparenciaRouteImport } from './routes/transparencia'
-import { Route as VenderRouteImport } from './routes/vender'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedVenderRouteImport } from './routes/_authenticated/vender'
 import { Route as OrdenesIndexRouteImport } from './routes/ordenes.index'
 import { Route as OrdenesIdRouteImport } from './routes/ordenes.$id'
 import { Route as PIdRouteImport } from './routes/p.$id'
@@ -87,14 +87,14 @@ const TransparenciaRoute = TransparenciaRouteImport.update({
   path: '/transparencia',
   getParentRoute: () => rootRouteImport,
 } as any)
-const VenderRoute = VenderRouteImport.update({
-  id: '/vender',
-  path: '/vender',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVenderRoute = AuthenticatedVenderRouteImport.update({
+  id: '/vender',
+  path: '/vender',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const OrdenesIndexRoute = OrdenesIndexRouteImport.update({
@@ -130,8 +130,8 @@ export interface FileRoutesByFullPath {
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
   '/transparencia': typeof TransparenciaRoute
-  '/vender': typeof VenderRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/vender': typeof AuthenticatedVenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
@@ -149,8 +149,8 @@ export interface FileRoutesByTo {
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
   '/transparencia': typeof TransparenciaRoute
-  '/vender': typeof VenderRoute
   '/perfil': typeof AuthenticatedPerfilRoute
+  '/vender': typeof AuthenticatedVenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
@@ -170,8 +170,8 @@ export interface FileRoutesById {
   '/terminos': typeof TerminosRoute
   '/tienda': typeof TiendaRoute
   '/transparencia': typeof TransparenciaRoute
-  '/vender': typeof VenderRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/_authenticated/vender': typeof AuthenticatedVenderRoute
   '/ordenes/$id': typeof OrdenesIdRoute
   '/p/$id': typeof PIdRoute
   '/u/$id': typeof UIdRoute
@@ -191,8 +191,8 @@ export interface FileRouteTypes {
     | '/terminos'
     | '/tienda'
     | '/transparencia'
-    | '/vender'
     | '/perfil'
+    | '/vender'
     | '/ordenes/$id'
     | '/p/$id'
     | '/u/$id'
@@ -210,8 +210,8 @@ export interface FileRouteTypes {
     | '/terminos'
     | '/tienda'
     | '/transparencia'
-    | '/vender'
     | '/perfil'
+    | '/vender'
     | '/ordenes/$id'
     | '/p/$id'
     | '/u/$id'
@@ -230,8 +230,8 @@ export interface FileRouteTypes {
     | '/terminos'
     | '/tienda'
     | '/transparencia'
-    | '/vender'
     | '/_authenticated/perfil'
+    | '/_authenticated/vender'
     | '/ordenes/$id'
     | '/p/$id'
     | '/u/$id'
@@ -251,7 +251,6 @@ export interface RootRouteChildren {
   TerminosRoute: typeof TerminosRoute
   TiendaRoute: typeof TiendaRoute
   TransparenciaRoute: typeof TransparenciaRoute
-  VenderRoute: typeof VenderRoute
   OrdenesIdRoute: typeof OrdenesIdRoute
   PIdRoute: typeof PIdRoute
   UIdRoute: typeof UIdRoute
@@ -344,18 +343,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransparenciaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/vender': {
-      id: '/vender'
-      path: '/vender'
-      fullPath: '/vender'
-      preLoaderRoute: typeof VenderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/perfil': {
       id: '/_authenticated/perfil'
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/vender': {
+      id: '/_authenticated/vender'
+      path: '/vender'
+      fullPath: '/vender'
+      preLoaderRoute: typeof AuthenticatedVenderRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/ordenes/': {
@@ -391,10 +390,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
+  AuthenticatedVenderRoute: typeof AuthenticatedVenderRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
+  AuthenticatedVenderRoute: AuthenticatedVenderRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -413,7 +414,6 @@ const rootRouteChildren: RootRouteChildren = {
   TerminosRoute: TerminosRoute,
   TiendaRoute: TiendaRoute,
   TransparenciaRoute: TransparenciaRoute,
-  VenderRoute: VenderRoute,
   OrdenesIdRoute: OrdenesIdRoute,
   PIdRoute: PIdRoute,
   UIdRoute: UIdRoute,
