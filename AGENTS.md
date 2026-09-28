@@ -14,3 +14,4 @@
 - All app pages wrap content in `AppShell` (desktop header + mobile bottom nav) — keeps app-like mobile nav consistent.
 - Sell flow lives in `src/components/sell/` (SellFlow, SellPhotos, SellSuccess) with local draft + banned-word checks in `src/lib/sell.ts`; publishing always goes through store `publish()` — single source of truth.
 - Seller center (`/tienda`) is built from `src/components/seller/*`; only derives metrics from store data (no invented analytics); state changes go through `setProductStatus` ("paused" pauses, "removed" = soft delete). Share logic lives in `src/lib/share.ts`.
+- Public trust pages (/nosotros, /transparencia, /terminos, /privacidad, /reglas) use `src/components/info/InfoParts`; configurable content (team, campaigns, metrics, legal versions) lives in `src/lib/legal.ts` — only real data, never invented. Consent is local-only (ConsentGate, shown to users with a profile).
