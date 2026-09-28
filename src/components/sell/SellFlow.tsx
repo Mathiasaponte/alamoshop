@@ -152,7 +152,7 @@ export function SellFlow() {
   }
 
   const progressSteps = steps.filter((s) => s !== "intro");
-  const pIdx = progressSteps.indexOf(id);
+  const pIdx = (progressSteps as StepId[]).indexOf(id);
 
   return (
     <Frame
