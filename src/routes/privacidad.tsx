@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { InfoHero, Section, Accordion } from "@/components/info/InfoParts";
-import { CONTACT_EMAIL, LEGAL_UPDATED, PRIVACY_VERSION } from "@/lib/legal";
+import { LEGAL_UPDATED, PRIVACY_VERSION } from "@/lib/legal";
 
 export const Route = createFileRoute("/privacidad")({
   head: () => ({
@@ -33,7 +33,7 @@ function Privacidad() {
           <Accordion title="Para qué se usa" defaultOpen><ul><li>Mostrar tus publicaciones y tu perfil.</li><li>Coordinar compras y ventas.</li><li>Mantener la comunidad segura (reportes y moderación).</li><li>Mejorar la plataforma.</li></ul></Accordion>
           <Accordion title="Publicidad y privacidad"><ul><li>Los anunciantes no reciben bases de datos de estudiantes.</li><li>La publicidad puede personalizarse por campus seleccionado y contexto general de uso.</li><li>No necesitamos GPS preciso para mostrar anuncios por campus.</li></ul></Accordion>
           <Accordion title="Menores de edad"><p>Nuestra comunidad puede incluir menores. Por eso no se permite contenido adulto, alcohol, nicotina, apuestas ni productos ilegales, y la publicidad debe ser apropiada para estudiantes.</p><p className="mt-2">Para operaciones de mayor valor recomendamos contar con el apoyo o conocimiento de madre, padre o tutor.</p></Accordion>
-          <Accordion title="Tus opciones"><p>Puedes editar tu perfil, borrar tus publicaciones o pedirnos eliminar tu información escribiendo a <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline">{CONTACT_EMAIL}</a>.</p></Accordion>
+          <Accordion title="Tus opciones"><p>Puedes editar tu perfil, borrar tus publicaciones en cualquier momento. Hoy tu información vive en este dispositivo; pronto habilitaremos un canal de contacto oficial para solicitudes de eliminación.</p></Accordion>
           <Accordion title="Cambios a este aviso"><p>Si el aviso cambia, actualizaremos la versión y te pediremos revisarlo de nuevo.</p></Accordion>
         </Section>
       </div>

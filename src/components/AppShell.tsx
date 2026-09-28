@@ -3,7 +3,6 @@ import { Home, Search, PlusCircle, Receipt, User, Heart } from "lucide-react";
 import type { ReactNode } from "react";
 import { Logo } from "./Logo";
 import { ConsentGate } from "./ConsentGate";
-import { CONTACT_EMAIL } from "@/lib/legal";
 
 const footer = [
   { to: "/nosotros", label: "Nosotros" },
@@ -66,17 +65,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       <main className="animate-in fade-in duration-300">{children}</main>
 
       <footer className="border-t border-border bg-background">
-        <div className="mx-auto max-w-6xl px-4 py-10 md:px-6">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <Logo variant="lockup" size={28} />
-            <nav className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
+        <div className="mx-auto max-w-6xl px-4 py-6 md:px-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <Logo variant="lockup" size={24} />
+            <nav className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground md:text-sm">
               {footer.map((l) => (
                 <Link key={l.to} to={l.to} className="hover:text-primary">{l.label}</Link>
               ))}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-primary">Contacto</a>
             </nav>
           </div>
-          <div className="mt-6 flex flex-col gap-1 text-xs text-muted-foreground md:flex-row md:justify-between">
+          <div className="mt-4 flex flex-col gap-1 border-t border-border pt-4 text-[0.7rem] text-muted-foreground md:flex-row md:justify-between">
             <p>Álamos Shop es una plataforma independiente.</p>
             <p className="tracking-[0.18em] uppercase">Built by <span className="font-semibold text-foreground">PEAK</span></p>
           </div>

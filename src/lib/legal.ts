@@ -1,7 +1,6 @@
 export const TERMS_VERSION = "1.0";
 export const PRIVACY_VERSION = "1.0";
 export const LEGAL_UPDATED = "27 de septiembre de 2026";
-export const CONTACT_EMAIL = "hola@alamosshop.com";
 
 const KEY = "alamos-shop-consent";
 

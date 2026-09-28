@@ -29,16 +29,16 @@ function Transparencia() {
     <AppShell>
       <div className="bg-background">
         <InfoHero eyebrow="Cuentas claras" title="Transparencia" subtitle="Lo que genere Álamos Shop debe poder explicarse." />
-        <Section tone="soft">
+        <Section tone="soft" eyebrow="Día uno" title="Apenas estamos empezando.">
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border">
             {cards.map((c, i) => (
               <Reveal key={c.l} delay={i * 100} className="bg-background p-5 md:p-8">
-                <p className="font-display text-4xl font-semibold text-primary md:text-5xl">{c.v}</p>
-                <p className="mt-2 text-xs uppercase tracking-[0.14em] text-muted-foreground">{c.l}</p>
+                <p className="font-display text-3xl font-semibold text-primary/80 sm:text-4xl md:text-5xl">{c.v}</p>
+                <p className="mt-2 text-[0.68rem] uppercase leading-snug tracking-[0.12em] text-muted-foreground">{c.l}</p>
               </Reveal>
             ))}
           </div>
-          <p className="mt-5 text-sm text-muted-foreground">Solo mostramos datos reales. Estamos empezando: todavía no hay ingresos publicitarios ni operaciones registradas en línea.</p>
+          <div className="mt-5 flex items-start gap-3 text-sm text-muted-foreground"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" /><p>Estos números se actualizarán con datos reales. Todavía no hay ingresos publicitarios ni operaciones registradas en línea, y nunca mostraremos cifras inventadas.</p></div>
         </Section>
         <Section eyebrow="Campañas" title="Campañas sociales">
           {CAMPAIGNS.length === 0 ? (
