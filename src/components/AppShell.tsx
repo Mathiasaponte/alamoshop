@@ -3,6 +3,7 @@ import { Home, Search, PlusCircle, Receipt, User, Heart } from "lucide-react";
 import type { ReactNode } from "react";
 import { Logo } from "./Logo";
 import { ConsentGate } from "./ConsentGate";
+import { useSession } from "@/lib/use-session";
 
 const footer = [
   { to: "/nosotros", label: "Nosotros" },
@@ -29,6 +30,7 @@ const mobile = [
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { user, ready } = useSession();
   return (
     <div className="min-h-screen bg-secondary pb-24 md:pb-0">
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur">
@@ -52,12 +54,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link to="/favoritos" className="rounded-full p-2 text-muted-foreground hover:text-primary md:hidden" aria-label="Favoritos">
               <Heart className="h-5 w-5" />
             </Link>
-            <Link
-              to="/perfil"
-              className="hidden rounded-full border border-border px-4 py-2 text-sm transition-colors hover:border-primary hover:text-primary md:inline-flex"
-            >
-              Perfil
-            </Link>
+            {ready && (
+              <Link
+                to={user ? "/perfil" : "/auth"}
+                className="hidden rounded-full border border-border px-4 py-2 text-sm transition-colors hover:border-primary hover:text-primary md:inline-flex"
+              >
+                {user ? "Perfil" : "Entrar"}
+              </Link>
+            )}
           </div>
         </div>
       </header>
