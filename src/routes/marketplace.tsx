@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { z } from "zod";
 import { AppShell, Avatar } from "@/components/AppShell";
@@ -45,7 +45,6 @@ function Marketplace() {
   const set = (patch: Partial<z.infer<typeof searchSchema>>) =>
     navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
-  const filters = { ...search, campus: search.campus ?? prefs.campus ?? undefined, level: search.level ?? prefs.level ?? undefined };
   // Campus/nivel del onboarding solo filtran si el usuario los eligió explícitamente
   const qFilters = { ...search };
   const catalog = useInfiniteQuery({
@@ -54,7 +53,6 @@ function Marketplace() {
     initialPageParam: 0,
     getNextPageParam: (last) => ((last.page + 1) * PAGE_SIZE < last.count ? last.page + 1 : undefined),
   });
-  void filters;
   const results = catalog.data?.pages.flatMap((p) => p.items) ?? [];
   const total = catalog.data?.pages[0]?.count ?? 0;
 
