@@ -27,6 +27,7 @@ import {
 } from "@/lib/data";
 
 import { useStore } from "@/lib/store";
+import { CloudProduct } from "@/components/CloudProduct";
 
 export const Route = createFileRoute("/p/$id")({
   head: ({ params }) => {
@@ -110,7 +111,7 @@ function ProductPage() {
   const [asking, setAsking] = useState(false);
 
   if (!product) {
-    return (
+    const notFound = (
       <AppShell>
         <div className="mx-auto max-w-md px-6 py-24 text-center">
           <p className="font-display text-3xl text-primary">
@@ -132,6 +133,7 @@ function ProductPage() {
         </div>
       </AppShell>
     );
+    return <CloudProduct id={id} fallback={notFound} />;
   }
 
   const seller = getSeller(

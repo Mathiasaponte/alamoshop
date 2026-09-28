@@ -8,6 +8,8 @@ import { useStore } from "@/lib/store";
 import type { Campus, Level } from "@/lib/data";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>): { redirect?: string } =>
+    typeof s['redirect'] === "string" && s['redirect'].startsWith("/") && !s['redirect'].startsWith("//") ? { redirect: s['redirect'] } : {},
   head: () => ({
     meta: [
       { title: "Entrar — Álamos Shop" },
@@ -23,6 +25,8 @@ type Mode = "login" | "signup";
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect: back } = Route.useSearch();
+  const dest = back ?? "/marketplace";
   const { prefs, hydrated } = useStore();
   const [mode, setMode] = useState<Mode>("login");
   const [busy, setBusy] = useState(false);
@@ -45,13 +49,13 @@ function AuthPage() {
   // Si ya hay sesión, salir de aquí
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") navigate({ to: "/marketplace", replace: true });
+      if (event === "SIGNED_IN") navigate({ to: dest, replace: true });
     });
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/marketplace", replace: true });
+      if (data.session) navigate({ to: dest, replace: true });
     });
     return () => sub.subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, dest]);
 
   const valid =
     email.includes("@") &&
@@ -67,13 +71,13 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
         toast.success("Bienvenido de vuelta");
-        navigate({ to: "/marketplace", replace: true });
+        navigate({ to: dest, replace: true });
       } else {
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: window.location.origin + dest,
             data: {
               first_name: nombre.trim().slice(0, 40),
               last_name: apellido.trim().slice(0, 40),

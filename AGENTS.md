@@ -17,3 +17,5 @@
 - Public trust pages (/nosotros, /transparencia, /terminos, /privacidad, /reglas) use `src/components/info/InfoParts`; configurable content (team, campaigns, metrics, legal versions) lives in `src/lib/legal.ts` — only real data, never invented. Consent is local-only (ConsentGate, shown to users with a profile).
 - Shared data (profiles, products, images, favorites, orders, reviews, reports, consents) lives in Lovable Cloud with RLS; order status only changes via `transition_order`/`create_order` RPCs — keeps transitions and product reserved/sold consistent server-side. Prices stored as integer `price_cents`.
 - Contacts (instagram/whatsapp) live in `private_contacts` (owner-only) and are shared only through `get_order_contact` after acceptance — never exposed publicly.
+- Product image URLs resolve only through `src/lib/images.ts` (signed URLs today, swap to getPublicUrl when bucket is public); DB stores only storage_path — signed URLs expire.
+- Publishing goes through `src/lib/publish.ts` (upload → insert product → insert product_images, cleanup to status removed on failure); seller_id always from session.

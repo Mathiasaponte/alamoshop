@@ -4,6 +4,10 @@ import { ArrowLeft, Check, Package, Sparkles, X } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { CATEGORIES, CATEGORY_EMOJI, formatPrice, type Condition, type Delivery, type Product } from "@/lib/data";
 import { useStore } from "@/lib/store";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { getMyProfile } from "@/lib/profile.functions";
+import { publishDraft } from "@/lib/publish";
 import { EMPTY_DRAFT, clearDraft, findBanned, hasProgress, loadDraft, saveDraft, type SellDraft } from "@/lib/sell";
 import { SellPhotos } from "./SellPhotos";
 import { SellSuccess } from "./SellSuccess";
@@ -20,7 +24,12 @@ const DELIVERIES: { value: Delivery; label: string }[] = [
 const EXAMPLES = ["AirPods Pro", "Perfume JPG Le Beau", "Playera Nike", "Brownies caseros"];
 
 export function SellFlow() {
-  const { profile, myProducts, publish } = useStore();
+  const { prefs, myProducts } = useStore();
+  const fetchProfile = useServerFn(getMyProfile);
+  const { data: me } = useQuery({ queryKey: ["my-profile"], queryFn: () => fetchProfile() });
+  const profile = me?.profile ? { campus: me.profile.campus ?? prefs.campus ?? "Norte", level: me.profile.level ?? prefs.level ?? null } : null;
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState(false);
   const navigate = useNavigate();
   const firstTime = myProducts.length === 0;
 
@@ -117,16 +126,24 @@ export function SellFlow() {
     likes: 0,
   };
 
-  const submit = () => {
+  const submit = async () => {
+    if (busy) return;
     for (const s of steps) {
       const e = validate(s);
       if (e) { setError(e); go(steps.indexOf(s)); return; }
     }
-    const { id: _i, sellerId: _s, status: _st, createdAt: _c, likes: _l, ...rest } = draftProduct;
-    void _i; void _s; void _st; void _c; void _l;
-    const p = publish(rest);
-    clearDraft();
-    setPublished(p);
+    setBusy(true); setFailed(false); setError(null);
+    try {
+      const realId = await publishDraft(d, profile?.campus ?? "Norte", profile?.level ?? null);
+      clearDraft();
+      setPublished({ ...draftProduct, id: realId });
+    } catch (err) {
+      console.error(err);
+      setFailed(true);
+      setError("No pudimos publicar todavía.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const close = () => navigate({ to: "/marketplace" });
@@ -170,8 +187,8 @@ export function SellFlow() {
             )}
             <div className="flex gap-2">
               {id === "preview" && <button onClick={() => go(steps.indexOf("titulo"))} className="rounded-full px-6 py-4 text-sm font-medium ring-1 ring-border hover:ring-primary">Editar</button>}
-              <button onClick={next} className="flex-1 rounded-full bg-primary py-4 text-sm font-medium text-primary-foreground transition-all hover:bg-primary-deep active:scale-[0.98]">
-                {id === "intro" ? "Empezar" : id === "preview" ? "Publicar" : "Continuar"}
+              <button onClick={next} disabled={busy} className="flex-1 disabled:opacity-60 rounded-full bg-primary py-4 text-sm font-medium text-primary-foreground transition-all hover:bg-primary-deep active:scale-[0.98]">
+                {id === "intro" ? "Empezar" : id === "preview" ? (busy ? "Publicando…" : failed ? "Reintentar" : "Publicar") : "Continuar"}
               </button>
             </div>
           </>
