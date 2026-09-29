@@ -1,11 +1,74 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 import { ArrowLeft, MapPin, ShieldCheck, Star } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { formatPrice } from "@/lib/data";
 import { fetchProduct, fetchSeller } from "@/lib/catalog";
 import { useImageUrls } from "@/lib/images";
+import { useSession } from "@/lib/use-session";
+import { createOrder, fetchActiveOrderFor, invalidateOrderData, ORDER_LABEL } from "@/lib/orders";
+
+function BuyBox({ productId, sellerId, status }: { productId: string; sellerId: string; status: string }) {
+  const { user, ready } = useSession();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const existing = useQuery({
+    queryKey: ["active-order", productId, user?.id],
+    queryFn: () => fetchActiveOrderFor(productId, user!.id),
+    enabled: !!user && user.id !== sellerId,
+  });
+  if (!ready || user?.id === sellerId) return null;
+  if (existing.data)
+    return (
+      <Link to="/ordenes/$id" params={{ id: existing.data.id }} className="mt-5 block rounded-full border border-primary py-3.5 text-center text-sm font-medium text-primary">
+        {existing.data.status === "solicitud" ? "Solicitud enviada" : ORDER_LABEL[existing.data.status]} · Ver orden
+      </Link>
+    );
+  if (status !== "active") return null;
+
+  async function send() {
+    setBusy(true);
+    try {
+      const o = await createOrder(productId, note);
+      toast.success("Solicitud enviada");
+      setOpen(false);
+      invalidateOrderData(qc);
+      if (o?.id) navigate({ to: "/ordenes/$id", params: { id: o.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No pudimos enviar la solicitud");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        onClick={() => (user ? setOpen(true) : navigate({ to: "/auth", search: { redirect: `/p/${productId}` } }))}
+        className="mt-5 w-full rounded-full bg-primary py-3.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+      >
+        Solicitar compra
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/30 sm:items-center" onClick={() => !busy && setOpen(false)}>
+          <div className="w-full max-w-md rounded-t-2xl bg-background p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-2xl text-primary">Solicitar compra</h2>
+            <p className="mt-1 text-sm text-muted-foreground">El vendedor verá tu solicitud. Si la acepta, podrán ver sus contactos.</p>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} rows={3} placeholder="Mensaje opcional (ej. ¿puedes entregarlo el viernes?)" className="field mt-4 w-full" />
+            <button disabled={busy} onClick={() => void send()} className="mt-4 w-full rounded-full bg-primary py-3.5 text-sm font-medium text-primary-foreground disabled:opacity-50">
+              {busy ? "Enviando…" : "Enviar solicitud"}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 export const Route = createFileRoute("/p/$id")({
   head: () => ({
@@ -95,6 +158,7 @@ function ProductPage() {
                 </p>
               </div>
             </Link>
+            <BuyBox productId={p.id} sellerId={p.sellerId} status={p.status} />
             <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck className="h-3.5 w-3.5 text-gold" /> Los contactos solo se comparten cuando el vendedor acepta una solicitud.</p>
           </div>
         </div>
