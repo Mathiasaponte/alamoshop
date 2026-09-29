@@ -4,6 +4,7 @@ import { Star } from "lucide-react";
 import { AppShell, Avatar } from "@/components/AppShell";
 import { ProductCard } from "@/components/ProductCard";
 import { fetchCatalogPage, fetchSeller } from "@/lib/catalog";
+import { fetchSellerReviews } from "@/lib/orders";
 
 export const Route = createFileRoute("/u/$id")({
   head: () => ({
@@ -23,6 +24,7 @@ function SellerPage() {
   const { id } = Route.useParams();
   const s = useQuery({ queryKey: ["seller", id], queryFn: () => fetchSeller(id) });
   const items = useQuery({ queryKey: ["catalog", { sellerId: id }], queryFn: () => fetchCatalogPage({ sellerId: id }, 0), enabled: !!s.data });
+  const reviews = useQuery({ queryKey: ["reviews", id], queryFn: () => fetchSellerReviews(id), enabled: !!s.data });
 
   if (s.isPending) return <AppShell><p className="py-24 text-center text-sm text-muted-foreground">Cargando…</p></AppShell>;
   if (s.isError || !s.data)
@@ -64,6 +66,22 @@ function SellerPage() {
           <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 md:gap-x-5 lg:grid-cols-4">
             {list.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
+        )}
+        {(reviews.data?.length ?? 0) > 0 && (
+          <>
+            <h2 className="mt-12 mb-4 text-2xl text-primary">Reseñas</h2>
+            <div className="space-y-3">
+              {reviews.data!.map((r) => (
+                <div key={r.id} className="surface-card p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`h-3.5 w-3.5 ${i < r.stars ? "fill-gold text-gold" : "text-muted-foreground"}`} />)}</p>
+                    <p className="text-xs text-muted-foreground">{r.reviewer?.display_name || "Estudiante"} · {new Date(r.created_at).toLocaleDateString("es-MX")}</p>
+                  </div>
+                  {r.text && <p className="mt-2 text-sm text-foreground/80">{r.text}</p>}
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </AppShell>

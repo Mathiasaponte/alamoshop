@@ -83,6 +83,15 @@ export async function fetchCatalogPage(f: CatalogFilters, page: number) {
   return { items: (data as unknown as Row[]).map(toProduct), count: count ?? 0, page };
 }
 
+/** Productos visibles por id (los pausados/eliminados simplemente no vuelven). */
+export async function fetchProductsByIds(ids: string[]) {
+  const valid = ids.filter((i) => /^[0-9a-f-]{36}$/i.test(i));
+  if (!valid.length) return [];
+  const { data, error } = await supabase.from("products").select(SELECT).in("id", valid).in("status", ["active", "reserved", "sold"]).order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data as unknown as Row[]).map(toProduct);
+}
+
 export async function fetchProduct(id: string) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const { data, error } = await supabase.from("products").select(SELECT).eq("id", id).in("status", ["active", "reserved", "sold"]).maybeSingle();
