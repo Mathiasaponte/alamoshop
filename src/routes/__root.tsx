@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import { StoreProvider } from "../lib/store";
+import { FavoritesProvider } from "../lib/favorites";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
@@ -145,8 +146,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <StoreProvider>
-        <Outlet />
-        <Toaster position="top-center" />
+        <FavoritesProvider>
+          <Outlet />
+          <Toaster position="top-center" />
+        </FavoritesProvider>
       </StoreProvider>
     </QueryClientProvider>
   );

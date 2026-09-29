@@ -3,13 +3,14 @@ import { useState } from "react";
 import { Heart } from "lucide-react";
 import { formatPrice, type Product } from "@/lib/data";
 import { useStore } from "@/lib/store";
-import { toast } from "sonner";
+import { useFavorites } from "@/lib/favorites";
 import { useImageUrls } from "@/lib/images";
 
 export function ProductCard({ product }: { product: Product }) {
-  const { getSeller, favorites, toggleFavorite } = useStore();
+  const { getSeller } = useStore();
+  const { isFav, toggle } = useFavorites();
   const seller = getSeller(product.sellerId);
-  const fav = favorites.includes(product.id);
+  const fav = isFav(product.id);
   const [loaded, setLoaded] = useState(false);
   const { data: urls } = useImageUrls(product.imagePath ? [product.imagePath] : []);
   const cover = product.imagePath ? urls?.[0] : product.images[0];
@@ -33,8 +34,7 @@ export function ProductCard({ product }: { product: Product }) {
           aria-label={fav ? "Quitar de favoritos" : "Guardar"}
           onClick={(e) => {
             e.preventDefault();
-            toggleFavorite(product.id);
-            toast(fav ? "Quitado de favoritos" : "Guardado en favoritos");
+            toggle(product.id);
           }}
           className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-background/90 backdrop-blur transition-transform active:scale-90"
         >
