@@ -40,6 +40,9 @@ export function ProductCard({ product }: { product: Product }) {
         >
           <Heart key={String(fav)} className={`h-4 w-4 ${fav ? "fill-primary text-primary animate-in zoom-in-50 duration-300" : "text-foreground"}`} />
         </button>
+        {product.status === "sold" && (
+          <span className="absolute left-2 top-2 rounded-full bg-foreground/80 px-2.5 py-1 text-[0.65rem] font-medium text-background">Vendido</span>
+        )}
         {product.status === "reserved" && (
           <span className="absolute left-2 top-2 rounded-full bg-gold px-2.5 py-1 text-[0.65rem] font-medium text-gold-foreground">Reservado</span>
         )}
