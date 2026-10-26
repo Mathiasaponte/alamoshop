@@ -16,7 +16,7 @@ const cache = new Map<string, { url: string; exp: number }>();
 export async function resolveImageUrls(paths: string[]): Promise<string[]> {
   if (!paths.length) return [];
   const now = Date.now();
-  const missing = [...new Set(paths.filter((p) => !(cache.get(p)?.exp! > now + MARGIN)))];
+  const missing = [...new Set(paths.filter((p) => (cache.get(p)?.exp ?? 0) <= now + MARGIN))];
   if (missing.length) {
     const { data, error } = await supabase.storage.from(PRODUCT_BUCKET).createSignedUrls(missing, SIGNED_TTL);
     if (error) throw error;
@@ -31,5 +31,6 @@ export function useImageUrls(paths: string[]) {
     queryFn: () => resolveImageUrls(paths),
     enabled: paths.length > 0,
     staleTime: SIGNED_TTL * 1000 - MARGIN,
+    refetchInterval: SIGNED_TTL * 1000 - MARGIN,
   });
 }
