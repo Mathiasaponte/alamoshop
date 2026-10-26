@@ -101,10 +101,23 @@ export async function fetchProduct(id: string) {
 
 export async function fetchSeller(id: string) {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
-  const [{ data: p, error }, { data: s }] = await Promise.all([
+  const [{ data: p, error }, { data: s, error: statsError }] = await Promise.all([
     supabase.from("profiles").select("id, display_name, campus, level, bio, created_at").eq("id", id).maybeSingle(),
     supabase.from("seller_stats").select("rating, review_count, sales").eq("seller_id", id).maybeSingle(),
   ]);
   if (error) throw error;
+  if (statsError) throw statsError;
   return p ? { ...p, rating: Number(s?.rating ?? 0), reviews: Number(s?.review_count ?? 0), sales: Number(s?.sales ?? 0) } : null;
+}
+
+export async function fetchMyProducts(uid: string) {
+  const { data, error } = await supabase.from('products').select(SELECT).eq('seller_id', uid).neq('status', 'removed').order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data as unknown as Row[]).map(toProduct);
+}
+
+export async function updateProductStatus(uid: string, id: string, status: 'active' | 'paused' | 'sold' | 'removed') {
+  const { data, error } = await supabase.from('products').update({ status }).eq('id', id).eq('seller_id', uid).select('id').maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error('No pudimos cambiar esta publicación.');
 }
