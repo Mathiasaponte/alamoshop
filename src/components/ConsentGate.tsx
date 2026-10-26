@@ -1,23 +1,33 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { useStore } from "@/lib/store";
-import { loadConsent, saveConsent } from "@/lib/legal";
+import { useSession } from '@/lib/use-session';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { acceptCurrentConsent, hasCurrentConsent } from '@/lib/consent';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const POINTS = ["Respeta a los demás.", "Publica cosas reales.", "No estafes.", "No vendas productos prohibidos.", "Cumple tus acuerdos.", "Protege tu información."];
 
 /** Shown once to users with a profile (account features). Explorers never see it. */
 export function ConsentGate() {
-  const { profile } = useStore();
-  const [need, setNeed] = useState(false);
+  const { user, ready } = useSession();
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ['consent', user?.id], queryFn: () => user ? hasCurrentConsent(user.id) : false, enabled: ready && !!user });
+  const [busy, setBusy] = useState(false);
   const [terms, setTerms] = useState(false);
   const [privacy, setPrivacy] = useState(false);
 
-  useEffect(() => {
-    setNeed(!!profile && !loadConsent());
-  }, [profile]);
-
-  if (!need) return null;
+  if (!ready || !user || q.data === true) return null;
+  async function accept() {
+    if (!terms || !privacy || busy) return;
+    setBusy(true);
+    try {
+      await acceptCurrentConsent();
+      await qc.invalidateQueries({ queryKey: ['consent'] });
+    } catch { toast.error('No pudimos guardar tu aceptación. Intenta de nuevo.'); }
+    finally { setBusy(false); }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 backdrop-blur-sm md:items-center" role="dialog" aria-modal="true" aria-labelledby="consent-title">
@@ -43,17 +53,15 @@ export function ConsentGate() {
             <span>He leído el <Link to="/privacidad" target="_blank" className="text-primary underline">Aviso de Privacidad</Link>.</span>
           </label>
         </div>
-        <button
-          disabled={!terms || !privacy}
-          onClick={() => {
-            saveConsent();
-            setNeed(false);
-          }}
-          className="mt-6 w-full rounded-full bg-primary py-3.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-[var(--primary-deep)] disabled:opacity-40"
+        <Button
+          disabled={!terms || !privacy || busy || q.isPending || q.isError}
+          onClick={() => void accept()}
+          className="mt-6 h-auto w-full rounded-full py-3.5"
         >
-          Entrar a Álamos Shop
-        </button>
-        <p className="mt-3 text-center text-xs text-muted-foreground">Tu aceptación se guarda en este dispositivo.</p>
+          {q.isPending ? 'Cargando…' : busy ? 'Guardando…' : 'Entrar a Álamos Shop'}
+        </Button>
+        {q.isError && <Button variant="link" onClick={() => void q.refetch()}>No pudimos comprobar tu aceptación. Reintentar</Button>}
+        <p className="mt-3 text-center text-xs text-muted-foreground">Tu aceptación se guarda en tu cuenta.</p>
       </div>
     </div>
   );

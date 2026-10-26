@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Camera, Star, X } from "lucide-react";
+import { toast } from 'sonner';
 
 const MAX = 6;
 
@@ -7,14 +8,17 @@ async function resize(file: File): Promise<string> {
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.src = url;
+  try {
   await img.decode();
   const s = Math.min(1, 900 / Math.max(img.width, img.height));
   const c = document.createElement("canvas");
   c.width = Math.round(img.width * s);
   c.height = Math.round(img.height * s);
-  c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
-  URL.revokeObjectURL(url);
+  const ctx = c.getContext('2d');
+  if (!ctx) throw new Error('No pudimos procesar la foto.');
+  ctx.drawImage(img, 0, 0, c.width, c.height);
   return c.toDataURL("image/jpeg", 0.72);
+  } finally { URL.revokeObjectURL(url); }
 }
 
 /** Selector de fotos: agrega, elimina, reordena y elige portada (la primera). */
@@ -23,12 +27,15 @@ export function SellPhotos({ images, onChange }: { images: string[]; onChange: (
   const [busy, setBusy] = useState(false);
 
   const add = async (list: FileList | null) => {
+    if (busy) return;
     const files = Array.from(list ?? []).filter((f) => f.type.startsWith("image/")).slice(0, MAX - images.length);
     if (!files.length) return;
     setBusy(true);
     try {
       const out = await Promise.all(files.map(resize));
       onChange([...images, ...out].slice(0, MAX));
+    } catch {
+      toast.error('No pudimos procesar una foto. Prueba con JPG, PNG o WebP.');
     } finally {
       setBusy(false);
     }
@@ -38,11 +45,13 @@ export function SellPhotos({ images, onChange }: { images: string[]; onChange: (
     const j = i + d;
     if (j < 0 || j >= images.length) return;
     const n = [...images];
-    const a = n[i]!; n[i] = n[j]!; n[j] = a;
+    const a = n[i]; const b = n[j];
+    if (!a || !b) return;
+    n[i] = b; n[j] = a;
     onChange(n);
   };
 
-  const cover = (i: number) => onChange([images[i]!, ...images.filter((_, k) => k !== i)]);
+  const cover = (i: number) => { const image = images[i]; if (image) onChange([image, ...images.filter((_, k) => k !== i)]); };
 
   return (
     <div>

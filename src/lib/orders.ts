@@ -74,6 +74,7 @@ export async function fetchMyReview(orderId: string, uid: string) {
 }
 
 export async function createReview(o: CloudOrder, uid: string, stars: number, text: string) {
+  if (o.buyer_id !== uid || o.status !== 'completado' || !Number.isInteger(stars) || stars < 1 || stars > 5) throw new Error('No puedes reseñar esta orden.');
   const { error } = await supabase.from("reviews").insert({ order_id: o.id, reviewer_id: uid, reviewee_id: o.seller_id, stars, text: text.trim().slice(0, 500) });
   if (error) throw error;
 }
@@ -97,7 +98,7 @@ export function useOrdersRealtime(uid: string | null) {
   useEffect(() => {
     if (!uid) return;
     const ch = supabase
-      .channel(`orders-${uid}`)
+      .channel(`orders-${uid}-${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `buyer_id=eq.${uid}` }, () => invalidateOrderData(qc))
       .on("postgres_changes", { event: "*", schema: "public", table: "orders", filter: `seller_id=eq.${uid}` }, () => invalidateOrderData(qc))
       .subscribe();

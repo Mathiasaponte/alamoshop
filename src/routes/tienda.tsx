@@ -2,7 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { formatPrice } from "@/lib/data";
-import { useStore } from "@/lib/store";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSession } from '@/lib/use-session';
+import { fetchMyProducts, updateProductStatus } from '@/lib/catalog';
+import { fetchMyOrders, fetchSellerReviews, invalidateOrderData, useOrdersRealtime } from '@/lib/orders';
+import { useImageUrls } from '@/lib/images';
+import type { Order } from '@/lib/store';
+import { Button } from '@/components/ui/button';
 import { hasProgress, loadDraft } from "@/lib/sell";
 import {
   AnalyticsPlaceholder, ORDER_GROUPS, OrderList, PendingRequests, Section, SellerActivity, SellerDraft,
@@ -28,7 +34,28 @@ const TABS = ["Resumen", "Publicaciones", "Solicitudes"] as const;
 type Tab = (typeof TABS)[number];
 
 function Tienda() {
-  const { myProducts, orders, getProduct, hydrated } = useStore();
+  const { user, ready } = useSession();
+  const uid = user?.id;
+  const qc = useQueryClient();
+  useOrdersRealtime(uid ?? null);
+  const pq = useQuery({ queryKey: ['my-products', uid], queryFn: () => uid ? fetchMyProducts(uid) : [], enabled: !!uid });
+  const oq = useQuery({ queryKey: ['orders', uid], queryFn: () => uid ? fetchMyOrders(uid) : [], enabled: !!uid });
+  const rq = useQuery({ queryKey: ['reviews', uid], queryFn: () => uid ? fetchSellerReviews(uid) : [], enabled: !!uid });
+  const rawProducts = pq.data ?? [];
+  const paths = rawProducts.map(p => p.imagePath ?? '').filter(Boolean);
+  const images = useImageUrls(paths);
+  const pathUrls = new Map(paths.map((p,i) => [p, images.data?.[i] ?? '']));
+  const myProducts = rawProducts.map(p => ({ ...p, images: p.imagePath && pathUrls.get(p.imagePath) ? [pathUrls.get(p.imagePath) ?? ''] : [] }));
+  const cloudIncoming = (oq.data ?? []).filter(o => o.seller_id === uid);
+  const orders: Order[] = cloudIncoming.map(o => ({ id:o.id, productId:o.product_id, buyerId:o.buyer_id, status:o.status, note:o.note, createdAt:new Date(o.created_at).getTime() }));
+  const getProduct = (id: string) => myProducts.find(p => p.id === id);
+  const hydrated = ready && !pq.isPending && !oq.isPending;
+  async function changeStatus(id: string, status: 'active' | 'paused' | 'sold' | 'removed') {
+    if (!uid) throw new Error('Necesitas una cuenta.');
+    await updateProductStatus(uid,id,status);
+    await qc.invalidateQueries({ queryKey: ['my-products'] });
+    invalidateOrderData(qc);
+  }
   const [tab, setTab] = useState<Tab>("Resumen");
   const [group, setGroup] = useState<(typeof ORDER_GROUPS)[number]["key"]>("solicitud");
   const [draft, setDraft] = useState<string | null>(null);
@@ -39,15 +66,17 @@ function Tienda() {
   }, []);
 
   const products = myProducts.filter((p) => p.status !== "removed");
-  const incoming = orders.filter((o) => myProducts.some((p) => p.id === o.productId));
+  const incoming = orders;
   const completed = incoming.filter((o) => o.status === "completado");
-  const revenue = completed.reduce((s, o) => s + (getProduct(o.productId)?.price ?? 0), 0);
-  const soldCount = products.filter((p) => p.status === "sold").length;
+  const revenue = cloudIncoming.filter(o => o.status === "completado").reduce((s,o) => s + (o.product?.price_cents ?? 0) / 100,0);
+  const soldCount = completed.length;
 
   const publishBtn = (
     <Link to="/vender" className="shrink-0 rounded-full bg-primary px-3.5 py-2 text-xs font-medium text-primary-foreground hover:bg-primary-deep md:px-5 md:py-2.5 md:text-sm">+ Publicar algo</Link>
   );
 
+  if (ready && !uid) return <AppShell><div className="py-24 text-center"><h1 className="text-3xl text-primary">Entra para ver tu tienda</h1><Button asChild className="mt-5"><Link to="/auth" search={{ redirect: '/tienda' }}>Entrar</Link></Button></div></AppShell>;
+  if (pq.isError || oq.isError) return <AppShell><div className="py-24 text-center"><p>No pudimos cargar tu tienda.</p><Button className="mt-4" onClick={() => { void pq.refetch(); void oq.refetch(); }}>Reintentar</Button></div></AppShell>;
   return (
     <AppShell>
       <div className="mx-auto max-w-5xl px-4 py-6 md:px-6 md:py-10">
@@ -88,7 +117,7 @@ function Tienda() {
 
                   <div className="flex flex-wrap gap-2">
                     <Link to="/ordenes" className="rounded-full px-4 py-2 text-sm text-foreground ring-1 ring-border hover:ring-primary/40">Ver órdenes</Link>
-                    <Link to="/u/$id" params={{ id: "me" }} className="rounded-full px-4 py-2 text-sm text-foreground ring-1 ring-border hover:ring-primary/40">Ver mi perfil público</Link>
+                    <Link to="/u/$id" params={{ id: uid ?? "" }} className="rounded-full px-4 py-2 text-sm text-foreground ring-1 ring-border hover:ring-primary/40">Ver mi perfil público</Link>
                     <Link to="/perfil" className="rounded-full px-4 py-2 text-sm text-foreground ring-1 ring-border hover:ring-primary/40">Editar perfil</Link>
                   </div>
 
@@ -96,14 +125,14 @@ function Tienda() {
 
                   <div className="grid gap-10 md:grid-cols-2">
                     <Section title="Actividad"><SellerActivity products={products} incoming={incoming} getProduct={getProduct} /></Section>
-                    <Section title="Reseñas"><SellerReviews incoming={incoming} /></Section>
+                    <Section title="Reseñas">{rq.isError ? <Button variant="link" onClick={() => void rq.refetch()}>Reintentar reseñas</Button> : rq.isPending ? <p>Cargando…</p> : rq.data?.length ? <ul className="space-y-2">{rq.data.map(r => <li key={r.id} className="text-sm">{r.stars} ★ {r.text}</li>)}</ul> : <p className="text-sm text-muted-foreground">Aún no tienes reseñas.</p>}</Section>
                   </div>
                 </>
               )}
 
               {tab === "Publicaciones" && (
                 <Section title="Tus publicaciones" action={<span className="text-xs text-muted-foreground">{products.length}</span>}>
-                  <SellerListings products={products} incoming={incoming} />
+                  <SellerListings products={products} incoming={incoming} onStatusChange={changeStatus} />
                 </Section>
               )}
 

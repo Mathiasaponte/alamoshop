@@ -2,15 +2,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { PRODUCT_BUCKET } from "./images";
 import type { SellDraft } from "./sell";
 import type { Campus, Level } from "./data";
-
-export function toCents(price: string): number {
-  // Evita floats: "850.5" → 85050
-  const [int, dec = ""] = price.trim().replace(",", ".").split(".");
-  return Number(int || "0") * 100 + Number((dec + "00").slice(0, 2));
-}
+import { validateListing } from './listing-validation';
+export { toCents } from './listing-validation';
 
 async function toBlob(src: string): Promise<{ blob: Blob; ext: string }> {
   const blob = await (await fetch(src)).blob();
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(blob.type) || blob.size > 5 * 1024 * 1024) throw new Error('Usa fotos JPG, PNG o WebP de hasta 5 MB.');
   const ext = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
   return { blob, ext };
 }
@@ -20,6 +17,7 @@ async function toBlob(src: string): Promise<{ blob: Blob; ext: string }> {
  * seller_id sale siempre de la sesión. Si algo falla, limpia lo que alcanzó a crear.
  */
 export async function publishDraft(d: SellDraft, campus: Campus, level: Level | null): Promise<string> {
+  const priceCents = validateListing(d);
   const { data: u, error: ue } = await supabase.auth.getUser();
   if (ue || !u.user) throw new Error("Necesitas iniciar sesión");
   const uid = u.user.id;
@@ -42,9 +40,9 @@ export async function publishDraft(d: SellDraft, campus: Campus, level: Level | 
       id: productId,
       seller_id: uid,
       type: d.kind === "servicio" ? "service" : "product",
-      title: d.title.trim().slice(0, 120),
-      description: d.description.trim().slice(0, 2000),
-      price_cents: toCents(d.price),
+      title: d.title.trim(),
+      description: d.description.trim(),
+      price_cents: priceCents,
       currency: "MXN",
       category: d.category ?? "Otros",
       condition: d.kind === "servicio" ? null : d.condition,

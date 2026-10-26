@@ -1,5 +1,11 @@
 # Roadmap — Fase 5 (backend multiusuario)
 
+## Auditoría y estabilización (26 octubre 2026)
+- [ ] Inspeccionar implementación completa y contrastarla con este roadmap.
+- [ ] Corregir fallos comprobados sin rediseñar ni sustituir Cloud por datos locales.
+- [ ] Verificar permisos, políticas, almacenamiento y recorridos con dos cuentas (requiere Cloud disponible).
+- [ ] Documentar resultados, cambios y límites de verificación.
+
 - [x] Activar Lovable Cloud, email+password
 - [x] Tablas + RLS: profiles, private_contacts, products, product_images, favorites, orders, reviews, reports, consents; vista seller_stats
 - [x] RPC seguras: create_order, transition_order, get_order_contact, my_product_favorite_counts

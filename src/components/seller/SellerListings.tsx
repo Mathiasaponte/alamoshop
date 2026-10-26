@@ -12,14 +12,21 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { formatPrice, type Product } from "@/lib/data";
 import { productShare } from "@/lib/share";
-import { useStore, type Order } from "@/lib/store";
+import { type Order } from "@/lib/store";
 import { StatusChip, fmtDate } from "./SellerParts";
 import { PromoteSheet } from "./PromoteSheet";
 
 type Confirm = { kind: "sold" | "delete"; product: Product } | null;
 
-export function SellerListings({ products, incoming }: { products: Product[]; incoming: Order[] }) {
-  const { setProductStatus } = useStore();
+export function SellerListings({ products, incoming, onStatusChange }: { products: Product[]; incoming: Order[]; onStatusChange: (id: string, status: 'active' | 'paused' | 'sold' | 'removed') => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const setProductStatus = async (id: string, status: 'active' | 'paused' | 'sold' | 'removed') => {
+    if (busy) return;
+    setBusy(true);
+    try { await onStatusChange(id,status); pulse(id); toast.success('Publicación actualizada.'); }
+    catch { toast.error('No pudimos cambiar la publicación. Si tiene una orden en curso, complétala primero.'); }
+    finally { setBusy(false); }
+  };
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [promote, setPromote] = useState<Product | null>(null);
   const [perf, setPerf] = useState<Product | null>(null);
@@ -28,8 +35,8 @@ export function SellerListings({ products, incoming }: { products: Product[]; in
   const pulse = (id: string) => { setFlash(id); setTimeout(() => setFlash(null), 900); };
 
   const actions = {
-    pause: (p: Product) => { setProductStatus(p.id, "paused"); pulse(p.id); toast("Publicación pausada.", { action: { label: "Reactivar", onClick: () => setProductStatus(p.id, "active") } }); },
-    resume: (p: Product) => { setProductStatus(p.id, "active"); pulse(p.id); toast.success("Publicación activa de nuevo."); },
+    pause: (p: Product) => { void setProductStatus(p.id, "paused"); },
+    resume: (p: Product) => { void setProductStatus(p.id, "active"); },
     sold: (p: Product) => setConfirm({ kind: "sold", product: p }),
     remove: (p: Product) => setConfirm({ kind: "delete", product: p }),
     promote: setPromote,
@@ -39,8 +46,8 @@ export function SellerListings({ products, incoming }: { products: Product[]; in
   const doConfirm = () => {
     if (!confirm) return;
     const { kind, product } = confirm;
-    if (kind === "sold") { setProductStatus(product.id, "sold"); pulse(product.id); toast.success("¡Marcado como vendido!"); }
-    else { setProductStatus(product.id, "removed"); toast("Publicación eliminada."); }
+    if (kind === "sold") { void setProductStatus(product.id, "sold"); }
+    else { void setProductStatus(product.id, "removed"); }
     setConfirm(null);
   };
 
@@ -155,15 +162,15 @@ function Actions({ p, a }: { p: Product; a: A }) {
         <DropdownMenuItem disabled>Editar <span className="ml-auto text-[10px]">Próximamente</span></DropdownMenuItem>
         <DropdownMenuSeparator />
         {p.status === "active" && <DropdownMenuItem onSelect={() => a.pause(p)}>Pausar</DropdownMenuItem>}
-        {(p.status === "paused" || p.status === "reserved") && <DropdownMenuItem onSelect={() => a.resume(p)}>Reactivar</DropdownMenuItem>}
-        {p.status !== "sold" && <DropdownMenuItem onSelect={() => a.sold(p)}>Marcar como vendido</DropdownMenuItem>}
+        {p.status === "paused" && <DropdownMenuItem onSelect={() => a.resume(p)}>Reactivar</DropdownMenuItem>}
+        {p.status !== "sold" && p.status !== "reserved" && <DropdownMenuItem onSelect={() => a.sold(p)}>Marcar como vendido</DropdownMenuItem>}
         {p.status === "active" && <DropdownMenuItem onSelect={() => a.promote(p)}>Promocionar</DropdownMenuItem>}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => void s.share()}>Compartir</DropdownMenuItem>
         <DropdownMenuItem onSelect={() => void s.copy()}>Copiar link</DropdownMenuItem>
         <DropdownMenuItem asChild><a href={s.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => a.remove(p)} className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
+        <DropdownMenuItem disabled={p.status === "reserved"} onSelect={() => a.remove(p)} className="text-destructive focus:text-destructive">Eliminar</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
